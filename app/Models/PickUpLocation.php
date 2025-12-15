@@ -14,7 +14,7 @@ class PickUpLocation extends Model
         'status'
     ];
 
-    public $timestamps = false;
+    // public $timestamps = false;
 
     protected $casts = [
         'status' => 'string',
