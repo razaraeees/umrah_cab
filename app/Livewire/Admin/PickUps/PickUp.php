@@ -13,28 +13,26 @@ class PickUp extends Component
     protected $paginationTheme = 'bootstrap';
 
     public $search = '';
-    public $showModal = false;
+    public $showModal = false;   // <-- isi ko use karna
     public $editMode = false;
     public $pickupId;
-    
-    // Form fields
+
     public $pick_up_location = '';
     public $type = '';
     public $pickup_status = '';
 
     protected $rules = [
         'pick_up_location' => 'required|string|max:255',
-        'type' => 'required|in:airport,hotel,city,other',
-        'pickup_status' => 'required|in:active,inactive',
+        'type'            => 'required|in:airport,hotel,city,other',
+        'pickup_status'   => 'required|in:active,inactive',
     ];
 
     protected $messages = [
         'pick_up_location.required' => 'Pick up location is required.',
-        'type.required' => 'Type is required.',
-        'pickup_status.required' => 'Status is required.',
+        'type.required'             => 'Type is required.',
+        'pickup_status.required'    => 'Status is required.',
     ];
 
-    // Reset pagination when search changes
     public function updatingSearch()
     {
         $this->resetPage();
@@ -43,26 +41,28 @@ class PickUp extends Component
     public function openModal()
     {
         $this->resetForm();
-        $this->editMode = false;
+        $this->editMode  = false;
         $this->showModal = true;
+        $this->dispatch('modalOpened');
     }
 
     public function closeModal()
     {
         $this->showModal = false;
         $this->resetForm();
+        $this->dispatch('modalClosed');
     }
 
     public function edit($id)
     {
         $pickUp = PickUpLocation::findOrFail($id);
-        
-        $this->pickupId = $id;
+
+        $this->pickupId        = $id;
         $this->pick_up_location = $pickUp->pickup_location;
-        $this->type = $pickUp->type;
-        $this->pickup_status = $pickUp->status;
-        
-        $this->editMode = true;
+        $this->type            = $pickUp->type;
+        $this->pickup_status   = $pickUp->status;
+
+        $this->editMode  = true;
         $this->showModal = true;
     }
 
@@ -72,30 +72,31 @@ class PickUp extends Component
 
         try {
             if ($this->editMode) {
-                // Update existing record
                 $pickUp = PickUpLocation::findOrFail($this->pickupId);
                 $pickUp->update([
                     'pickup_location' => $validated['pick_up_location'],
-                    'type' => $validated['type'],
-                    'status' => $validated['pickup_status'],
+                    'type'            => $validated['type'],
+                    'status'          => $validated['pickup_status'],
                 ]);
-                
-                session()->flash('message', 'Pick up location updated successfully.');
+
+                $this->dispatch('show-toast', type: 'success', message: 'Pick up location updated successfully.');
+
             } else {
-                // Create new record
                 PickUpLocation::create([
                     'pickup_location' => $validated['pick_up_location'],
-                    'type' => $validated['type'],
-                    'status' => $validated['pickup_status'],
+                    'type'            => $validated['type'],
+                    'status'          => $validated['pickup_status'],
                 ]);
-                
-                session()->flash('message', 'Pick up location added successfully.');
+
+                $this->dispatch('show-toast', type: 'success', message: 'Pick up location created successfully.');
+
             }
 
             $this->closeModal();
-            
         } catch (\Exception $e) {
-            session()->flash('error', 'Something went wrong: ' . $e->getMessage());
+           
+            $this->dispatch('show-toast', type: 'error', message: 'Error: ' . $e->getMessage());
+
         }
     }
 
@@ -103,33 +104,35 @@ class PickUp extends Component
     {
         try {
             PickUpLocation::findOrFail($id)->delete();
-            session()->flash('message', 'Pick up location deleted successfully.');
+            $this->dispatch('show-toast', type: 'success', message: 'Pick up location deleted successfully.');
+
         } catch (\Exception $e) {
-            session()->flash('error', 'Failed to delete location.');
+            $this->dispatch('show-toast', type: 'error', message: 'Error: ' . $e->getMessage());
+
         }
     }
 
     public function resetForm()
     {
         $this->pick_up_location = '';
-        $this->type = '';
-        $this->pickup_status = '';
-        $this->pickupId = null;
+        $this->type             = '';
+        $this->pickup_status    = '';
+        $this->pickupId         = null;
         $this->resetValidation();
     }
 
     public function render()
     {
-        $pickUps = PickUpLocation::where(function($query) {
-            if ($this->search) {
-                $query->where('pickup_location', 'like', '%' . $this->search . '%')
-                      ->orWhere('type', 'like', '%' . $this->search . '%')
-                      ->orWhere('status', 'like', '%' . $this->search . '%');
-            }
-        })
-        ->orderBy('created_at', 'desc')
-        ->paginate(10);
+        $query = PickUpLocation::query();
         
+        if ($this->search) {
+            $query->where('pickup_location', 'like', '%'. $this->search .'%')
+                  ->orWhere('type', 'like', '%'. $this->search .'%')
+                  ->orWhere('status', 'like', '%'. $this->search .'%');
+        }
+        
+        $pickUps = $query->orderBy('created_at', 'desc')->paginate(10);
+
         return view('livewire.admin.pick-ups.pick-up', compact('pickUps'));
     }
 }

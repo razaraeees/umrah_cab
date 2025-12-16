@@ -19,11 +19,11 @@
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="ri-store-2-line"></i>
-                            <span>Booking Managemnet</span>
+                            <span>Booking Manage</span>
                         </a>
                         <ul class="sub-menu" aria-expanded="false">
                             <li><a href="{{ route('pickup.index') }}">Pick Up</a></li>
-                            <li><a href="ecommerce-product-detail.html">Drop Off</a></li>
+                            <li><a href="{{ route('drop-off.index') }}">Drop Off</a></li>
                         </ul>
                     </li>
                     <li>

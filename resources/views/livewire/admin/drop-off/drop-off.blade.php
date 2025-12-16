@@ -2,9 +2,8 @@
     <div class="page-content">
         <div class="container-fluid">
 
-            <livewire:admin.components.breadcrumbs title="Pick Up Location" bredcrumb1="Booking Managemnet"
-                bredcrumb2="Pick Up Location" />
-
+            <livewire:admin.components.breadcrumbs title="Drop off Location" bredcrumb1="Booking Management"
+                bredcrumb2="Drop off Location" />
 
             <div class="row">
                 <div class="col-12">
@@ -28,38 +27,36 @@
                                 </div>
                             </div>
 
-
                             <div class="table-responsive">
                                 <table class="table table-bordered dt-responsive nowrap"
                                     style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                                     <thead>
                                         <tr>
-                                            <th style="font-weight: 600; color: #000;">Pick Up Location
-                                            </th>
+                                            <th style="font-weight: 600; color: #000;">Pick Up Location</th>
+                                            <th style="font-weight: 600; color: #000;">Drop off Location</th>
                                             <th style="font-weight: 600; color: #000;">Type</th>
                                             <th style="font-weight: 600; color: #000;">Status</th>
                                             <th style="font-weight: 600; color: #000;">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse ($pickUps as $pickUp)
+                                        @forelse ($dropOffs as $dropOff)
                                             <tr>
-                                                <td>{{ $pickUp->pickup_location ?? '' }}</td>
+                                                <td>{{ $dropOff->pickUpLocation->pickup_location ?? 'N/A' }}</td>
+                                                <td>{{ $dropOff->drop_off_location ?? '' }}</td>
                                                 <td>
-                                                    <span
-                                                        class="badge badge-status-active">{{ ucfirst($pickUp->type ?? '') }}</span>
+                                                    <span class="badge badge-status-active">{{ ucfirst($dropOff->type ?? '') }}</span>
                                                 </td>
                                                 <td>
-                                                    @if ($pickUp->status == 'active')
+                                                    @if ($dropOff->status == 'active')
                                                         <span class="badge badge-status-active">Active</span>
                                                     @else
                                                         <span class="badge badge-status-inactive">Inactive</span>
                                                     @endif
-
                                                 </td>
                                                 <td>
                                                     <button type="button" class="btn btn-sm btn-outline-secondary me-1"
-                                                        wire:click="edit({{ $pickUp->id }})">
+                                                        wire:click="edit({{ $dropOff->id }})">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
                                                     <button type="button" class="btn btn-sm btn-outline-danger" x-data
@@ -76,19 +73,18 @@
                                                                 cancelButtonText: 'Cancel'
                                                             }).then((result) => {
                                                                 if (result.isConfirmed) {
-                                                                    $wire.delete({{ $pickUp->id }});
+                                                                    $wire.delete({{ $dropOff->id }});
                                                                 }
                                                             });
                                                         ">
                                                         <i class="fas fa-trash"></i>
                                                     </button>
-
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="4" class="text-center py-4">
-                                                    <p class="text-muted mb-0">No pick-up locations found.</p>
+                                                <td colspan="5" class="text-center py-4">
+                                                    <p class="text-muted mb-0">No drop-off locations found.</p>
                                                 </td>
                                             </tr>
                                         @endforelse
@@ -97,7 +93,7 @@
                             </div>
 
                             <div class="mt-3">
-                                {{ $pickUps->links() }}
+                                {{ $dropOffs->links() }}
                             </div>
                         </div>
                     </div>
@@ -120,7 +116,7 @@
                     @if (!empty($showHeader ?? true))
                         <div class="modal-header">
                             <h5 class="modal-title">
-                                {{ $editMode ? 'Edit Pick Up Location' : 'Add Pick Up Location' }}
+                                {{ $editMode ? 'Edit Drop Off Location' : 'Add Drop Off Location' }}
                             </h5>
                             <button type="button" class="btn-close" wire:click="closeModal"></button>
                         </div>
@@ -129,14 +125,32 @@
                     <div class="modal-body">
                         <form wire:submit.prevent="save">
                             <div class="mb-3">
-                                <label for="pickupLocation" class="form-label">
+                                <label for="pickUpLocation" class="form-label">
                                     Pick Up Location <span class="text-danger">*</span>
                                 </label>
+                                <select class="form-select @error('pick_up_location_id') is-invalid @enderror"
+                                    id="pickUpLocation" wire:model.defer="pick_up_location_id">
+                                    <option value="">Select Pick Up Location</option>
+                                    @foreach ($pickUpLocations as $pickUpLocation)
+                                        <option value="{{ $pickUpLocation->id }}">
+                                            {{ $pickUpLocation->pickup_location }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('pick_up_location_id')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="dropOffLocation" class="form-label">
+                                    Drop Off Location <span class="text-danger">*</span>
+                                </label>
                                 <input type="text"
-                                    class="form-control @error('pick_up_location') is-invalid @enderror"
-                                    id="pickupLocation" wire:model.defer="pick_up_location"
-                                    placeholder="Enter pick up location">
-                                @error('pick_up_location')
+                                    class="form-control @error('drop_off_location') is-invalid @enderror"
+                                    id="dropOffLocation" wire:model.defer="drop_off_location"
+                                    placeholder="Enter drop off location">
+                                @error('drop_off_location')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -159,16 +173,16 @@
                             </div>
 
                             <div class="mb-3">
-                                <label for="pickup_status" class="form-label">
+                                <label for="status" class="form-label">
                                     Status <span class="text-danger">*</span>
                                 </label>
-                                <select class="form-select @error('pickup_status') is-invalid @enderror"
-                                    id="pickup_status" wire:model.defer="pickup_status">
+                                <select class="form-select @error('status') is-invalid @enderror"
+                                    id="status" wire:model.defer="status">
                                     <option value="">Select Status</option>
                                     <option value="active">Active</option>
                                     <option value="inactive">Inactive</option>
                                 </select>
-                                @error('pickup_status')
+                                @error('status')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
@@ -177,8 +191,7 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" wire:click="closeModal">Close</button>
-                        <button type="button" class="btn btn-primary" wire:click="save"
-                            wire:loading.attr="disabled">
+                        <button type="button" class="btn btn-primary" wire:click="save" wire:loading.attr="disabled">
                             <span wire:loading.remove wire:target="save">
                                 <i class="fas fa-save me-1"></i>Save
                             </span>
@@ -192,6 +205,4 @@
             </div>
         </div>
     @endif
-
-
 </div>
