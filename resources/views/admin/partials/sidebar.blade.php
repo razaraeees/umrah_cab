@@ -26,28 +26,28 @@
                             <li><a href="{{ route('drop-off.index') }}">Drop Off</a></li>
                         </ul>
                     </li>
-                    <li>
+                    {{-- <li>
                         <a href="calendar.html" class=" waves-effect">
                             <i class="ri-calendar-2-line"></i>
                             <span>Calendar</span>
                         </a>
-                    </li>
+                    </li> --}}
                     <!-- end li -->
-                    <li>
+                    {{-- <li>
                         <a href="apps-chat.html" class=" waves-effect">
                             <i class="ri-chat-1-line"></i>
                             <span>Chat</span>
                         </a>
-                    </li>
+                    </li> --}}
 
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
-                            <i class="ri-mail-send-line"></i>
-                            <span>Email</span>
+                            <i class="ri-car-line"></i>
+                            <span>Cars & Driver</span>
                         </a>
                         <ul class="sub-menu" aria-expanded="false">
-                            <li><a href="email-inbox.html">Inbox</a></li>
-                            <li><a href="email-read.html">Read Email</a></li>
+                            <li><a href="#">Drivers</a></li>
+                            <li><a href="{{ route('car-detail.index') }}">Cars Details</a></li>
                         </ul>
                     </li>
                     <!-- end li -->
