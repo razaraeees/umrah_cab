@@ -9,7 +9,7 @@
                     <li class="menu-title">Menu</li>
 
                     <li>
-                        <a href="index.html" class="waves-effect">
+                        <a href="{{ route('dashboard') }}" class="waves-effect">
                             <i class="ri-dashboard-line"></i><span class="badge rounded-pill bg-success float-end">3</span>
                             <span>Dashboard</span>
                         </a>
@@ -24,29 +24,17 @@
                         <ul class="sub-menu" aria-expanded="false">
                             <li><a href="{{ route('pickup.index') }}">Pick Up</a></li>
                             <li><a href="{{ route('drop-off.index') }}">Drop Off</a></li>
+                            <li><a href="{{ route('drop-off.index') }}">Routes And Fares</a></li>
+
                         </ul>
                     </li>
-                    {{-- <li>
-                        <a href="calendar.html" class=" waves-effect">
-                            <i class="ri-calendar-2-line"></i>
-                            <span>Calendar</span>
-                        </a>
-                    </li> --}}
-                    <!-- end li -->
-                    {{-- <li>
-                        <a href="apps-chat.html" class=" waves-effect">
-                            <i class="ri-chat-1-line"></i>
-                            <span>Chat</span>
-                        </a>
-                    </li> --}}
-
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="ri-car-line"></i>
                             <span>Cars & Driver</span>
                         </a>
                         <ul class="sub-menu" aria-expanded="false">
-                            <li><a href="#">Drivers</a></li>
+                            <li><a href="{{ route('driver-detail.index') }}">Drivers</a></li>
                             <li><a href="{{ route('car-detail.index') }}">Cars Details</a></li>
                         </ul>
                     </li>

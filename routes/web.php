@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CarController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\DriverController;
 use App\Http\Controllers\Admin\DropOffController;
 use App\Http\Controllers\Admin\PickUpController;
 use Illuminate\Support\Facades\Route;
@@ -25,5 +26,10 @@ Route::prefix('admin')->group(function () {
         Route::get('car-detail', 'index')->name('car-detail.index');
         Route::get('car-detail/create', 'create')->name('car-detail.create');
         Route::get('car-detail/{id}/edit', 'edit')->name('car-detail.edit');
+    });
+    Route::controller(DriverController::class)->group(function() {
+        Route::get('driver-detail', 'index')->name('driver-detail.index');
+        Route::get('driver-detail/create', 'create')->name('driver-detail.create');
+        Route::get('driver-detail/{id}/edit', 'edit')->name('driver-detail.edit');
     });
 });

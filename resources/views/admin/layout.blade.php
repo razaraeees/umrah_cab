@@ -41,9 +41,9 @@
     <!-- Begin page -->
     <div id="layout-wrapper">
 
-        <header id="page-topbar">
+        
             @include('admin.partials.header')
-        </header>
+       
 
         <!-- ========== Left Sidebar Start ========== -->
         @include('admin.partials.sidebar')

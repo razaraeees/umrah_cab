@@ -17,12 +17,13 @@ return new class extends Migration
             $table->string('phone')->nullable();      
             $table->string('email')->nullable();      
             $table->string('status')->default('active');  
-            $table->string('availability')->default('available'); 
             $table->unsignedBigInteger('car_id')->nullable();      
             $table->string('rc_copy')->nullable();
             $table->string('driving_license')->nullable();   
             $table->date('dl_expiry')->nullable();  
             $table->string('insurance_copy')->nullable(); 
+            $table->string('car_image')->nullable();
+            $table->string('driver_image')->nullable(); 
             $table->timestamps();
             $table->foreign('car_id')->references('id')->on('car_details')->onDelete('set null');
         });

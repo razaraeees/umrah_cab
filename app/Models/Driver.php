@@ -10,12 +10,18 @@ class Driver extends Model
         'name',               
         'phone',              
         'email',              
-        'status',             
-        'availability',       
+        'status',                   
         'car_id',             
         'rc_copy',            
         'insurance_copy',     
         'driving_license',    
-        'dl_expiry',          
+        'dl_expiry',
+        'car_image',          
+        'driver_image',       
     ];
+
+    public function carDetails()
+    {
+        return $this->belongsTo(CarDetails::class, 'car_id');
+    }
 }
