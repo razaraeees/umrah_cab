@@ -46,7 +46,7 @@
 
         <!-- RIGHT SIDE: All Icons -->
         <div class="d-flex align-items-center">
-            <!-- Apps Dropdown -->
+            {{-- <!-- Apps Dropdown -->
             <div class="dropdown d-none d-lg-inline-block">
                 <button type="button" class="btn header-item noti-icon waves-effect" data-bs-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false">
@@ -100,7 +100,7 @@
                     </div>
                 </div>
             </div>
-            <!-- end Apps -->
+            <!-- end Apps --> --}}
 
             <!-- Fullscreen Button -->
             <div class="dropdown d-none d-lg-inline-block">
@@ -209,28 +209,50 @@
             <div class="dropdown d-inline-block user-dropdown">
                 <button type="button" class="btn header-item waves-effect" id="page-header-user-dropdown"
                     data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <img class="rounded-circle header-profile-user" src="{{ asset('assets/images/users/avatar-7.jpg') }}"
-                        alt="Header Avatar">
-                    <span class="d-none d-xl-inline-block ms-1">Malvika</span>
+                    <img class="rounded-circle header-profile-user" src="{{ auth()->user()->avatar ? asset('storage/' . auth()->user()->avatar) : asset('assets/images/users/avatar-7.jpg') }}"
+                        alt="Header Avatar" style="height: 36px; width: 36px; object-fit: cover; border-radius: 50%;">
+                    <span class="d-none d-xl-inline-block ms-1">{{ auth()->user()->name ?? 'Admin User' }}</span>
                     <i class="mdi mdi-chevron-down d-none d-xl-inline-block"></i>
                 </button>
                 <div class="dropdown-menu dropdown-menu-end">
                     <!-- item-->
                     <a class="dropdown-item" href="#"><i class="ri-user-line align-middle me-1"></i>
                         Profile</a>
-                    <a class="dropdown-item" href="#"><i class="ri-wallet-2-line align-middle me-1"></i> My
-                        Wallet</a>
-                    <a class="dropdown-item d-block" href="#"><span
-                            class="badge bg-success float-end mt-1">11</span><i
-                            class="ri-settings-2-line align-middle me-1"></i> Settings</a>
-                    <a class="dropdown-item" href="#"><i class="ri-lock-unlock-line align-middle me-1"></i>
-                        Lock screen</a>
+                    <a class="dropdown-item " href="#"><i
+                            class="ri-settings-2-line align-middle me-1"></i>  Security Settings</a>
                     <div class="dropdown-divider"></div>
-                    <a class="dropdown-item text-danger" href="#"><i
-                            class="ri-shut-down-line align-middle me-1 text-danger"></i> Logout</a>
+                    <form action="{{ route('logout') }}" method="POST" class="dropdown-item">
+                        @csrf
+                        <button type="submit" class="btn btn-link text-danger p-0 border-0 bg-transparent">
+                            <i class="ri-shut-down-line align-middle me-1 text-danger"></i>
+                            Logout
+                        </button>
+                    </form>
                 </div>
             </div>
             <!-- end user -->
         </div>
     </div>
 </header>
+
+<script>
+// Listen for profile update events
+document.addEventListener('livewire:init', () => {
+    Livewire.on('profile-updated', (event) => {
+        // Extract data from event (Livewire v3 passes data as array)
+        const data = Array.isArray(event) ? event[0] : event;
+        
+        // Update header profile image
+        const headerAvatar = document.querySelector('.header-profile-user');
+        if (headerAvatar && data.avatar) {
+            headerAvatar.src = data.avatar;
+        }
+        
+        // Update header profile name
+        const headerName = document.querySelector('.user-dropdown .d-none.d-xl-inline-block.ms-1');
+        if (headerName && data.name) {
+            headerName.textContent = data.name;
+        }
+    });
+});
+</script>

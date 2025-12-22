@@ -151,6 +151,8 @@
                                     <option value="airport">Airport</option>
                                     <option value="hotel">Hotel</option>
                                     <option value="city">City</option>
+                                    <option value="city">Ziyarat</option>
+                                    <option value="city">Guide</option>
                                     <option value="other">Other</option>
                                 </select>
                                 @error('type')

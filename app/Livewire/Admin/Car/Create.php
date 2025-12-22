@@ -17,6 +17,7 @@ class Create extends Component
     public $seating_capacity;
     public $fuel_type;
     public $car_type;
+    public $air_condition;
 
     protected $rules = [
         'name' => 'required|string|max:255',
@@ -29,6 +30,7 @@ class Create extends Component
         'seating_capacity' => 'required|integer|min:1',
         'fuel_type' => 'nullable|string|max:50',
         'car_type' => 'nullable|string|max:50',
+        'air_condition' => 'nullable|boolean',
     ];
 
     public function save()
@@ -46,6 +48,7 @@ class Create extends Component
             'seating_capacity' => $this->seating_capacity,
             'fuel_type' => $this->fuel_type,
             'car_type' => $this->car_type,
+            'air_condition' => $this->air_condition,
         ]);
 
         $this->dispatch('show-toast', type: 'success', message: 'Car created successfully.');

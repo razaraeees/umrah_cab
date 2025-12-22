@@ -166,6 +166,7 @@ File: Main Css File
   width: 36px;
   background-color: rgba(255, 255, 255, 0.25);
   padding: 3px;
+  object-fit: cover;
 }
 
 .user-dropdown .dropdown-item i {

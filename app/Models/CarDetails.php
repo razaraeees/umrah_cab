@@ -17,5 +17,9 @@ class CarDetails extends Model
         'seating_capacity',
         'fuel_type',
         'car_type',
+        'air_condition',
+    ];
+    protected $casts = [
+        'air_condition' => 'boolean',
     ];
 }

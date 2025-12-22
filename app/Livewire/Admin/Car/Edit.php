@@ -19,6 +19,7 @@ class Edit extends Component
     public $seating_capacity;
     public $fuel_type;
     public $car_type;
+    public $air_condition;
 
     public function mount($carId)
     {
@@ -35,6 +36,7 @@ class Edit extends Component
         $this->seating_capacity = $car->seating_capacity;
         $this->fuel_type = $car->fuel_type;
         $this->car_type = $car->car_type;
+        $this->air_condition = $car->air_condition ? '1' : '0';
     }
 
     protected function rules()
@@ -50,6 +52,7 @@ class Edit extends Component
             'seating_capacity' => 'required|integer|min:1',
             'fuel_type' => 'nullable|string|max:50',
             'car_type' => 'nullable|string|max:50',
+            'air_condition' => 'nullable|boolean',
         ];
     }
 
@@ -68,6 +71,7 @@ class Edit extends Component
             'seating_capacity' => $this->seating_capacity,
             'fuel_type' => $this->fuel_type,
             'car_type' => $this->car_type,
+            'air_condition' => $this->air_condition,
         ]);
 
         $this->dispatch('show-toast', type: 'success', message: 'Car updated successfully.');

@@ -3,7 +3,6 @@
 namespace App\Livewire\Admin\DropOff;
 
 use App\Models\DropLocation;
-use App\Models\PickUpLocation;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -26,7 +25,7 @@ class DropOff extends Component
     protected $rules = [
         'pick_up_location_id' => 'required|exists:pick_up_locations,id',
         'drop_off_location' => 'required|string|max:255',
-        'type' => 'required|in:airport,hotel,city,other',
+        'type' => 'required|in:airport,hotel,city,other,ziyarat,guide',
         'status' => 'required|in:active,inactive',
     ];
 
@@ -128,6 +127,7 @@ class DropOff extends Component
     {
         $query = DropLocation::with('pickUpLocation');
 
+        // Apply search filter
         if ($this->search) {
             $query->where('drop_off_location', 'like', '%' . $this->search . '%')
                 ->orWhere('type', 'like', '%' . $this->search . '%')
@@ -138,7 +138,9 @@ class DropOff extends Component
         }
 
         $dropOffs = $query->orderBy('created_at', 'desc')->paginate(10);
-        $pickUpLocations = PickUpLocation::where('status', 'active')->orderBy('pickup_location')->get();
+        
+        // Get all pickup locations for modal
+        $pickUpLocations = \App\Models\PickUpLocation::where('status', 'active')->orderBy('pickup_location')->get();
 
         return view('livewire.admin.drop-off.drop-off', compact('dropOffs', 'pickUpLocations'));
     }

@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class DropLocation extends Model
-{
+
+{ 
+    use HasFactory;
+    
     protected $fillable = [
         'pick_up_location_id',
         'drop_off_location',
@@ -14,6 +18,6 @@ class DropLocation extends Model
     ];
     public function pickUpLocation()
     {
-        return $this->belongsTo(PickUpLocation::class);
+    return $this->belongsTo(PickUpLocation::class);
     }
 }

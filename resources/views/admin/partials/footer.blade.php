@@ -2,11 +2,11 @@
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-sm-6">
-                        <script>document.write(new Date().getFullYear())</script> Upbond.
+                        <script>document.write(new Date().getFullYear())</script> Diginotive.
                     </div>
                     <div class="col-sm-6">
                         <div class="text-sm-end d-none d-sm-block">
-                            Crafted with <i class="mdi mdi-heart text-danger"></i> by <a href="https://1.envato.market/themesdesign" target="_blank">Themesdesign</a>
+                            Crafted with <i class="mdi mdi-heart text-danger"></i> by <a href="https://www.diginotive.com/" target="_blank">Diginotive</a>
                         </div>
                     </div>
                 </div>

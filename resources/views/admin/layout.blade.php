@@ -41,9 +41,9 @@
     <!-- Begin page -->
     <div id="layout-wrapper">
 
-        
-            @include('admin.partials.header')
-       
+
+        @include('admin.partials.header')
+
 
         <!-- ========== Left Sidebar Start ========== -->
         @include('admin.partials.sidebar')
@@ -129,7 +129,7 @@
             padding: 10px !important;
 
         }
-        
+
         .custom-toast-title {
             font-size: 16px !important;
             font-weight: 500 !important;
@@ -137,6 +137,25 @@
             padding: 10px !important;
         }
     </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            @if (session('success'))
+                Swal.fire({
+                    toast: true,
+                    icon: 'success',
+                    title: '{{ session('success') }}',
+                    position: 'top-end',
+                    timer: 3000,
+                    showConfirmButton: false,
+                    customClass: {
+                        popup: 'custom-toast',
+                        title: 'custom-toast-title'
+                    }
+                });
+            @endif
+        });
+    </script>
+
 
     @livewireScripts
 

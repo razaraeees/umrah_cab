@@ -1,21 +1,28 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\CarController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\DriverController;
+use App\Http\Controllers\Admin\BookingController;
+use App\Http\Controllers\Admin\CityController;
 use App\Http\Controllers\Admin\DropOffController;
 use App\Http\Controllers\Admin\PickUpController;
-use Illuminate\Support\Facades\Route;
-
-Route::get('/', function () {
-    return view('welcome');
-});
+use App\Http\Controllers\Admin\RouteFaresController;
+use App\Http\Controllers\Admin\HotelController;
 
 
-Route::prefix('admin')->group(function () {
+
+
+
+Route::prefix('admin')->middleware(['auth', 'verified'])->group(function () {
     Route::controller(DashboardController::class)->group(function() {
         Route::get('dashboard', 'index')->name('dashboard');
     });
+    
+    Route::get('profile', function() {
+        return view('admin.profile'); })->name('profile');
+    
     Route::controller(PickUpController::class)->group(function() {
         Route::get('pickup', 'index')->name('pickup.index');
     });
@@ -32,4 +39,32 @@ Route::prefix('admin')->group(function () {
         Route::get('driver-detail/create', 'create')->name('driver-detail.create');
         Route::get('driver-detail/{id}/edit', 'edit')->name('driver-detail.edit');
     });
+    Route::controller(RouteFaresController::class)->group(function() {
+        Route::get('routefares', 'index')->name('routefares.index');
+        Route::get('routefares/create', 'create')->name('routefares.create');
+        Route::get('routefares/{id}/edit', 'edit')->name('routefares.edit');
+    });
+    Route::controller(BookingController::class)->group(function() {
+        Route::get('booking-list', 'index')->name('booking-list.index');
+        Route::get('booking/create', 'create')->name('booking-list.create');
+        Route::get('booking/{id}/edit', 'edit')->name('booking-list.edit');
+    });
+    Route::controller(CityController::class)->group(function() {
+        Route::get('cities', 'index')->name('cities.index');
+    });
+Route::controller(HotelController::class)->group(function() {
+        Route::get('hotels', 'index')->name('hotel.index');
+    });
 });
+
+// Route::view('/', 'welcome');
+
+// Route::view('dashboard', 'dashboard')
+//     ->middleware(['auth', 'verified'])
+//     ->name('dashboard');
+
+// Route::view('profile', 'profile')
+//     ->middleware(['auth'])
+//     ->name('profile');
+
+require __DIR__.'/auth.php';

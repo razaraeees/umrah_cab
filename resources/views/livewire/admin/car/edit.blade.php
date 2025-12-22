@@ -5,11 +5,6 @@
             <livewire:admin.components.breadcrumbs title="Car Edit" bredcrumb1="Booking Management"
                 bredcrumb2="Car Edit" />
 
-            <div class="mb-2 d-flex justify-content-end">
-                <a href="{{ route('car-detail.index') }}" class="btn btn-outline-primary btn-sm">
-                    <i class="fas fa-arrow-left me-1"></i> Back to List
-                </a>
-            </div>
 
             <div class="row">
                 <div class="col-12">
@@ -49,7 +44,7 @@
                                 <h6 class="text-uppercase text-muted fw-semibold mb-3 mt-2">Specifications</h6>
                                 <div class="row">
                                     <div class="col-md-4">
-                                        <div class="mb-4">
+                                        <div class="mb-3">
                                             <label for="carType" class="form-label">Car Type</label>
                                             <select class="form-select @error('car_type') is-invalid @enderror"
                                                 id="carType" wire:model.defer="car_type">
@@ -66,7 +61,7 @@
                                     </div>
                                     <!-- end col -->
                                     <div class="col-md-4">
-                                        <div class="mb-4">
+                                        <div class="mb-3">
                                             <label for="color" class="form-label">Color <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control @error('color') is-invalid @enderror"
                                                 id="color" placeholder="Enter color" wire:model.defer="color">
@@ -77,7 +72,22 @@
                                     </div>
                                     <!-- end col -->
                                     <div class="col-md-4">
-                                        <div class="mb-4">
+                                        <div class="mb-3">
+                                            <label for="year" class="form-label">Year</label>
+                                            <input type="text" class="form-control @error('year') is-invalid @enderror"
+                                                id="year" placeholder="e.g. 2024" wire:model.defer="year">
+                                            @error('year')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <!-- end col -->
+                                </div>
+                                <!-- end row -->
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
                                             <label for="seatingCapacity" class="form-label">Seating Capacity <span class="text-danger">*</span></label>
                                             <input type="number"
                                                 class="form-control @error('seating_capacity') is-invalid @enderror"
@@ -89,10 +99,6 @@
                                         </div>
                                     </div>
                                     <!-- end col -->
-                                </div>
-                                <!-- end row -->
-
-                                <div class="row">
                                     <div class="col-md-4">
                                         <div class="mb-3">
                                             <label for="door" class="form-label">Door</label>
@@ -115,36 +121,43 @@
                                         </div>
                                     </div>
                                     <!-- end col -->
-                                    <div class="col-md-4">
-                                        <div class="mb-3">
-                                            <label for="year" class="form-label">Year</label>
-                                            <input type="text" class="form-control @error('year') is-invalid @enderror"
-                                                id="year" placeholder="e.g. 2024" wire:model.defer="year">
-                                            @error('year')
-                                                <div class="invalid-feedback">{{ $message }}</div>
-                                            @enderror
-                                        </div>
-                                    </div>
-                                    <!-- end col -->
                                 </div>
                                 <!-- end row -->
 
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="mb-3">
                                             <label for="fuelType" class="form-label">Fuel Type</label>
-                                            <input type="text" class="form-control @error('fuel_type') is-invalid @enderror"
-                                                id="fuelType" placeholder="e.g. Petrol, Diesel" wire:model.defer="fuel_type">
+                                            <select class="form-select @error('fuel_type') is-invalid @enderror"
+                                                id="fuelType" wire:model.defer="fuel_type">
+                                                <option value="">Select fuel type</option>
+                                                <option value="petrol">Petrol</option>
+                                                <option value="diesel">Diesel</option>
+                                                <option value="hybrid">Hybrid</option>
+                                                <option value="electric">Electric</option>
+                                            </select>
                                             @error('fuel_type')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
                                         </div>
                                     </div>
-                                    <!-- end col -->
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="mb-3">
-                                            <label for="registrationNumber" class="form-label">Registration
-                                                Number</label>
+                                            <label for="airCondition" class="form-label">Air Condition</label>
+                                            <select class="form-select @error('air_condition') is-invalid @enderror"
+                                                id="airCondition" wire:model.defer="air_condition">
+                                                <option value="">Select option</option>
+                                                <option value="1">Yes</option>
+                                                <option value="0">No</option>
+                                            </select>
+                                            @error('air_condition')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="registrationNumber" class="form-label">Registration Number <span class="text-danger">*</span></label>
                                             <input type="text" class="form-control @error('registration_number') is-invalid @enderror"
                                                 id="registrationNumber" placeholder="Enter registration number"
                                                 wire:model.defer="registration_number">
@@ -153,9 +166,7 @@
                                             @enderror
                                         </div>
                                     </div>
-                                    <!-- end col -->
                                 </div>
-                                <!-- end row -->
 
                                 <div class="d-flex justify-content-end mt-2">
                                     <a href="{{ route('car-detail.index') }}" class="btn btn-light me-2">Cancel</a>

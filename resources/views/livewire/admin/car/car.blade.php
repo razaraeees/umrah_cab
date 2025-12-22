@@ -36,6 +36,7 @@
                                             <th style="font-weight: 600; color: #000;">Model Variant</th>
                                             <th style="font-weight: 600; color: #000;">Car Type</th>
                                             <th style="font-weight: 600; color: #000;">Seating Capacity</th>
+                                            <th style="font-weight: 600; color: #000;">Air Condition</th>
                                             <th style="font-weight: 600; color: #000;">Actions</th>
                                         </tr>
                                     </thead>
@@ -49,6 +50,13 @@
                                                 </td>
                                                 <td>
                                                     {{ $car->seating_capacity ?? 'N/A' }}
+                                                </td>
+                                                <td>
+                                                    @if($car->air_condition)
+                                                        <span class="badge bg-success">Yes</span>
+                                                    @else
+                                                        <span class="badge bg-danger">No</span>
+                                                    @endif
                                                 </td>
                                                 <td>
                                                     <a href="{{ route('car-detail.edit', $car->id) }}" class="btn btn-sm btn-outline-secondary me-1">
