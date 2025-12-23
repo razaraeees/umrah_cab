@@ -16,44 +16,50 @@ use App\Http\Controllers\Admin\HotelController;
 
 
 Route::prefix('admin')->middleware(['auth', 'verified'])->group(function () {
-    Route::controller(DashboardController::class)->group(function() {
+    Route::controller(DashboardController::class)->group(function () {
         Route::get('dashboard', 'index')->name('dashboard');
     });
-    
-    Route::get('profile', function() {
-        return view('admin.profile'); })->name('profile');
-    
-    Route::controller(PickUpController::class)->group(function() {
+
+    Route::get('profile', function () {
+        return view('admin.profile');
+    })->name('profile');
+
+    Route::controller(PickUpController::class)->group(function () {
         Route::get('pickup', 'index')->name('pickup.index');
     });
-    Route::controller(DropOffController::class)->group(function() {
+    Route::controller(DropOffController::class)->group(function () {
         Route::get('drop-off', 'index')->name('drop-off.index');
     });
-    Route::controller(CarController::class)->group(function() {
+    Route::controller(CarController::class)->group(function () {
         Route::get('car-detail', 'index')->name('car-detail.index');
         Route::get('car-detail/create', 'create')->name('car-detail.create');
         Route::get('car-detail/{id}/edit', 'edit')->name('car-detail.edit');
     });
-    Route::controller(DriverController::class)->group(function() {
+    Route::controller(DriverController::class)->group(function () {
         Route::get('driver-detail', 'index')->name('driver-detail.index');
         Route::get('driver-detail/create', 'create')->name('driver-detail.create');
         Route::get('driver-detail/{id}/edit', 'edit')->name('driver-detail.edit');
     });
-    Route::controller(RouteFaresController::class)->group(function() {
+    Route::controller(RouteFaresController::class)->group(function () {
         Route::get('routefares', 'index')->name('routefares.index');
         Route::get('routefares/create', 'create')->name('routefares.create');
         Route::get('routefares/{id}/edit', 'edit')->name('routefares.edit');
     });
-    Route::controller(BookingController::class)->group(function() {
+    Route::controller(BookingController::class)->group(function () {
         Route::get('booking-list', 'index')->name('booking-list.index');
         Route::get('booking/create', 'create')->name('booking-list.create');
         Route::get('booking/{id}/edit', 'edit')->name('booking-list.edit');
     });
-    Route::controller(CityController::class)->group(function() {
+    Route::controller(CityController::class)->group(function () {
         Route::get('cities', 'index')->name('cities.index');
     });
-Route::controller(HotelController::class)->group(function() {
+    Route::controller(HotelController::class)->group(function () {
         Route::get('hotels', 'index')->name('hotel.index');
+    });
+    Route::controller(BookingController::class)->group(function () {
+        Route::get('booking', 'index')->name('booking.index');
+        Route::get('booking/create', 'create')->name('booking.create');
+
     });
 });
 
@@ -67,4 +73,4 @@ Route::controller(HotelController::class)->group(function() {
 //     ->middleware(['auth'])
 //     ->name('profile');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

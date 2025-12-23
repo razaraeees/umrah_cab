@@ -20,8 +20,14 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         $this->call([
+            UserSeeder::class,
+            CarDetailsSeeder::class,
+            DriverSeeder::class,
+            CitySeeder::class,
+            HotelSeeder::class,
             PickUpLocationSeeder::class,
             DropOffLocationSeeder::class,
+            RouteFaresSeeder::class,
         ]);
     }
 }

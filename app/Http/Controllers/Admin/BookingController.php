@@ -11,4 +11,14 @@ class BookingController extends Controller
     {
         return view('admin.booking.index');
     }
+
+    public function create()
+    {
+        return view('admin.booking.create');
+    }
+
+    // public function edit($id)
+    // {
+    //     return view('admin.booking.edit');
+    // }
 }

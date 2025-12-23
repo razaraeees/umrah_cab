@@ -26,7 +26,7 @@
                             <li><a href="{{ route('routefares.index') }}">Routes And Fares</a></li>
                             <li><a href="{{ route('cities.index') }}">Cities</a></li>
                             <li><a href="{{ route('hotel.index') }}">Hotels</a></li>
-                            <li><a href="{{ route('drop-off.index') }}">Bookings</a></li>
+                            <li><a href="{{ route('booking.index') }}">Bookings</a></li>
 
                         </ul>
                     </li>
