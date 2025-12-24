@@ -13,16 +13,21 @@ use App\Models\City;
 use App\Models\RouteFares;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
-class BookingCreate extends Component
+class BookingEdit extends Component
 {
+    public $bookingId;
+    public $booking;
+
     // Customer Information
     #[Validate('required|string|max:255')]
     public $guest_name = '';
-    #[Validate('required|string|max:20|regex:/^[0-9]+$/')]
+
+    #[Validate('required|string|max:20')]
     public $guest_phone = '';
 
-    #[Validate('nullable|string|max:20|regex:/^[0-9]+$/')]
+    #[Validate('nullable|string|max:20')]
     public $guest_whatsapp = '';
 
     // Route Information
@@ -75,7 +80,7 @@ class BookingCreate extends Component
     #[Validate('required|date|after_or_equal:today')]
     public $pickup_date = '';
 
-    #[Validate('required|date_format:H:i')]
+    #[Validate('required')]
     public $pickup_time = '';
 
     // Flight Information
@@ -88,7 +93,7 @@ class BookingCreate extends Component
     #[Validate('nullable|date|after_or_equal:today')]
     public $arrival_departure_date = '';
 
-    #[Validate('nullable|date_format:H:i')]
+    #[Validate('nullable')]
     public $arrival_departure_time = '';
 
     #[Validate('nullable|string|max:1000')]
@@ -105,13 +110,105 @@ class BookingCreate extends Component
     public $extra_information = '';
 
     /**
-     * Mount component with default values
+     * Mount component with booking data
      */
-    public function mount()
+    public function mount($id)
     {
-        $this->pickup_date = now()->addDay()->format('Y-m-d');
-        $this->pickup_time = '09:00';
+        $this->bookingId = $id;
+        $this->loadBooking();
+    }
+
+    /**
+     * Load existing booking data
+     */
+    private function loadBooking()
+    {
+        $this->booking = Bookings::with(['pickupLocation', 'dropoffLocation', 'vehicle'])
+            ->findOrFail($this->bookingId);
+
+        // Customer Information
+        $this->guest_name = $this->booking->guest_name ?? '';
+        $this->guest_phone = $this->stripPhonePrefix($this->booking->guest_phone ?? '');
+        $this->guest_whatsapp = $this->stripPhonePrefix($this->booking->guest_whatsapp ?? '');
+
+        // Route Information - Pickup
+        $this->pickup_location_id = $this->booking->pickup_location_id ?? '';
+        $this->pickup_location_name = $this->booking->pickup_location_name ?? '';
+        $this->pickup_hotel_name = $this->booking->pickup_hotel_name ?? '';
+
+        // Get pickup city if hotel exists
+        if ($this->pickup_hotel_name) {
+            $hotel = Hotel::where('name', $this->pickup_hotel_name)->first();
+            $this->pickup_city_id = $hotel ? $hotel->city_id : '';
+        }
+
+        // Route Information - Dropoff
+        $this->dropoff_location_id = $this->booking->dropoff_location_id ?? '';
+        $this->dropoff_location_name = $this->booking->dropoff_location_name ?? '';
+        $this->dropoff_hotel_name = $this->booking->dropoff_hotel_name ?? '';
+
+        // Get dropoff city if hotel exists
+        if ($this->dropoff_hotel_name) {
+            $hotel = Hotel::where('name', $this->dropoff_hotel_name)->first();
+            $this->dropoff_city_id = $hotel ? $hotel->city_id : '';
+        }
+
+        // Vehicle Information
+        $this->vehicle_id = $this->booking->vehicle_id ?? '';
+        $this->vehicle_name = $this->booking->vehicle_name ?? '';
+        $this->price = $this->booking->price ?? '';
+
+        // Passenger Information
+        $this->no_of_adults = $this->booking->no_of_adults ?? 1;
+        $this->no_of_children = $this->booking->no_of_children ?? 0;
+        $this->no_of_infants = $this->booking->no_of_infants ?? 0;
+        $this->total_passengers = $this->booking->total_passengers ?? 0;
+
+        // Schedule Information
+        $this->pickup_date = $this->booking->pickup_date ?? '';
+        $this->pickup_time = $this->booking->pickup_time ?? '';
+
+        // Flight Information
+        $this->airline_name = $this->booking->airline_name ?? '';
+        $this->flight_number = $this->booking->flight_number ?? '';
+        $this->flight_details = $this->booking->flight_details ?? '';
+        $this->arrival_departure_date = $this->booking->arrival_departure_date ?? '';
+        $this->arrival_departure_time = $this->booking->arrival_departure_time ?? '';
+
+        // Additional Information
+        $this->booking_status = $this->booking->booking_status ?? 'pending';
+        $this->recived_paymnet = $this->booking->recived_paymnet ?? '';
+        $this->extra_information = $this->booking->extra_information ?? '';
+
+        // Set location types
+        $this->setLocationTypes();
+
+        // Calculate total passengers
         $this->calculateTotalPassengers();
+    }
+
+    /**
+     * Strip + prefix from phone number for display
+     */
+    private function stripPhonePrefix($phone)
+    {
+        return ltrim($phone, '+');
+    }
+
+    /**
+     * Set location types based on loaded data
+     */
+    private function setLocationTypes()
+    {
+        if ($this->pickup_location_id) {
+            $pickupLocation = PickUpLocation::find($this->pickup_location_id);
+            $this->pickup_location_type = $pickupLocation ? $pickupLocation->type : '';
+        }
+
+        if ($this->dropoff_location_id) {
+            $dropoffLocation = DropLocation::find($this->dropoff_location_id);
+            $this->dropoff_location_type = $dropoffLocation ? $dropoffLocation->type : '';
+        }
     }
 
     /**
@@ -120,30 +217,31 @@ class BookingCreate extends Component
     public function updatedPickupLocationId($value)
     {
         if (!$value) {
-            $this->resetPickupData();
+            $this->pickup_location_type = '';
+            $this->pickup_hotel_name = '';
+            $this->pickup_city_id = '';
+            $this->clearFlightInfo();
             return;
         }
 
-        $pickupLocation = PickUpLocation::find($value);
+        $pickup = PickUpLocation::find($value);
+        if ($pickup) {
+            $this->pickup_location_type = $pickup->type;
+            $this->pickup_location_name = $pickup->pickup_location;
 
-        if ($pickupLocation) {
-            $this->pickup_location_name = $pickupLocation->pickup_location;
-            $this->pickup_location_type = $pickupLocation->type;
-
-            // Clear hotel name if not hotel type
-            if ($this->pickup_location_type !== 'Hotel') {
+            // Agar Hotel type nahi hai to hotel fields clear karo
+            if ($pickup->type !== 'Hotel') {
                 $this->pickup_hotel_name = '';
                 $this->pickup_city_id = '';
             }
 
-            // Clear flight info if not airport
-            if ($this->pickup_location_type !== 'Airport') {
+            // Agar Airport type nahi hai to flight info clear karo
+            if ($pickup->type !== 'Airport') {
                 $this->clearFlightInfo();
             }
         }
 
-        // Reset dependent fields
-        $this->resetDropoffAndVehicleData();
+        $this->calculatePrice();
     }
 
     /**
@@ -152,27 +250,69 @@ class BookingCreate extends Component
     public function updatedDropoffLocationId($value)
     {
         if (!$value) {
-            $this->resetDropoffData();
+            $this->dropoff_location_type = '';
+            $this->dropoff_hotel_name = '';
+            $this->dropoff_city_id = '';
             return;
         }
 
-        $dropoffLocation = DropLocation::find($value);
+        $dropoff = DropLocation::find($value);
+        if ($dropoff) {
+            $this->dropoff_location_type = $dropoff->type;
+            $this->dropoff_location_name = $dropoff->drop_off_location;
 
-        if ($dropoffLocation) {
-            $this->dropoff_location_name = $dropoffLocation->drop_off_location;
-            $this->dropoff_location_type = $dropoffLocation->type;
-
-            // Clear hotel name if not hotel type
-            if ($this->dropoff_location_type !== 'Hotel') {
+            // Agar Hotel type nahi hai to hotel fields clear karo
+            if ($dropoff->type !== 'Hotel') {
                 $this->dropoff_hotel_name = '';
                 $this->dropoff_city_id = '';
             }
         }
 
-        // Reset vehicle and price
-        $this->vehicle_id = '';
-        $this->vehicle_name = '';
-        $this->price = '';
+        $this->calculatePrice();
+    }
+
+    /**
+     * Updated pickup city
+     */
+    public function updatedPickupCityId($value)
+    {
+        // City change hone par hotel clear nahi karo
+        // Alpine.js handle karega filtering
+    }
+
+    /**
+     * Updated dropoff city
+     */
+    public function updatedDropoffCityId($value)
+    {
+        // City change hone par hotel clear nahi karo
+        // Alpine.js handle karega filtering
+    }
+
+    /**
+     * Updated pickup hotel
+     */
+    public function updatedPickupHotelName($value)
+    {
+        if ($value) {
+            $hotel = Hotel::where('name', $value)->first();
+            if ($hotel) {
+                $this->pickup_city_id = $hotel->city_id;
+            }
+        }
+    }
+
+    /**
+     * Updated dropoff hotel
+     */
+    public function updatedDropoffHotelName($value)
+    {
+        if ($value) {
+            $hotel = Hotel::where('name', $value)->first();
+            if ($hotel) {
+                $this->dropoff_city_id = $hotel->city_id;
+            }
+        }
     }
 
     /**
@@ -187,9 +327,8 @@ class BookingCreate extends Component
         }
 
         $vehicle = CarDetails::find($value);
-
         if ($vehicle) {
-            $this->vehicle_name = "{$vehicle->name} - {$vehicle->model_variant}";
+            $this->vehicle_name = $vehicle->name . ' - ' . $vehicle->model_variant;
             $this->validatePassengerCapacity($vehicle->seating_capacity);
         }
 
@@ -199,10 +338,9 @@ class BookingCreate extends Component
     /**
      * Calculate price based on route fare
      */
-    public function calculatePrice()
+    private function calculatePrice()
     {
         if (!$this->pickup_location_id || !$this->dropoff_location_id || !$this->vehicle_id) {
-            $this->price = '';
             return;
         }
 
@@ -210,21 +348,9 @@ class BookingCreate extends Component
             ->where('dropoff_id', $this->dropoff_location_id)
             ->where('vehicle_id', $this->vehicle_id)
             ->where('status', 'active')
-            ->where(function ($query) {
-                $query->whereNull('start_date')
-                    ->orWhere('start_date', '<=', now());
-            })
-            ->where(function ($query) {
-                $query->whereNull('end_date')
-                    ->orWhere('end_date', '>=', now());
-            })
             ->first();
 
-        $this->price = $routeFare ? $routeFare->amount : '';
-
-        if (!$this->price) {
-            $this->addError('price', 'No fare found for this route and vehicle combination.');
-        }
+        $this->price = $routeFare ? $routeFare->amount : 0;
     }
 
     /**
@@ -284,45 +410,6 @@ class BookingCreate extends Component
     }
 
     /**
-     * Reset pickup related data
-     */
-    private function resetPickupData()
-    {
-        $this->pickup_location_name = '';
-        $this->pickup_location_type = '';
-        $this->pickup_city_id = '';
-        $this->pickup_hotel_name = '';
-        $this->clearFlightInfo();
-        $this->resetDropoffAndVehicleData();
-    }
-
-    /**
-     * Reset dropoff and vehicle data
-     */
-    private function resetDropoffAndVehicleData()
-    {
-        $this->dropoff_location_id = '';
-        $this->dropoff_location_name = '';
-        $this->dropoff_location_type = '';
-        $this->dropoff_city_id = '';
-        $this->dropoff_hotel_name = '';
-        $this->vehicle_id = '';
-        $this->vehicle_name = '';
-        $this->price = '';
-    }
-
-    /**
-     * Reset dropoff data
-     */
-    private function resetDropoffData()
-    {
-        $this->dropoff_location_name = '';
-        $this->dropoff_location_type = '';
-        $this->dropoff_city_id = '';
-        $this->dropoff_hotel_name = '';
-    }
-
-    /**
      * Clear flight information
      */
     private function clearFlightInfo()
@@ -335,14 +422,12 @@ class BookingCreate extends Component
     }
 
     /**
-     * Save booking
+     * Update booking
      */
-    public function save()
+    public function update()
     {
-        // Validate all fields
         $this->validate();
 
-        // Additional validation
         $this->calculateTotalPassengers();
 
         if ($this->total_passengers < 1) {
@@ -350,7 +435,6 @@ class BookingCreate extends Component
             return;
         }
 
-        // Validate vehicle capacity one more time
         if ($this->vehicle_id) {
             $vehicle = CarDetails::find($this->vehicle_id);
             if ($vehicle && $this->total_passengers > $vehicle->seating_capacity) {
@@ -362,14 +446,12 @@ class BookingCreate extends Component
         try {
             DB::beginTransaction();
 
-            // Format phone numbers
             $guestPhone = $this->formatPhoneNumber($this->guest_phone);
             $guestWhatsapp = $this->guest_whatsapp
                 ? $this->formatPhoneNumber($this->guest_whatsapp)
                 : $guestPhone;
 
-            // Create booking
-            $booking = Bookings::create([
+            $this->booking->update([
                 'guest_name' => trim($this->guest_name),
                 'guest_phone' => $guestPhone,
                 'guest_whatsapp' => $guestWhatsapp,
@@ -396,25 +478,26 @@ class BookingCreate extends Component
                 'booking_status' => $this->booking_status,
                 'price' => $this->price,
                 'recived_paymnet' => $this->recived_paymnet ?? 0,
-                'created_by' => auth()->id(),
+                'updated_by' => Auth::id(),
             ]);
 
             DB::commit();
 
-            session()->flash('message', "Booking #{$booking->id} created successfully!");
+            session()->flash('message', "Booking #{$this->booking->id} updated successfully!");
 
             return redirect()->route('booking.index');
         } catch (\Exception $e) {
             DB::rollBack();
 
-            Log::error('Booking creation failed', [
+            Log::error('Booking update failed', [
+                'booking_id' => $this->bookingId,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
 
-            session()->flash('error', 'Failed to create booking. Please try again.');
+            session()->flash('error', 'Failed to update booking. Please try again.');
 
-            $this->addError('save', 'An error occurred while saving the booking.');
+            $this->addError('update', 'An error occurred while updating the booking.');
         }
     }
 
@@ -429,29 +512,18 @@ class BookingCreate extends Component
 
     /**
      * Render component
-     * IMPORTANT: Pass all data as regular variables, not computed properties
      */
     public function render()
     {
-        // Get active route fares
+        // Get all route fares for editing
         $routeFares = RouteFares::where('status', 'active')
-            ->where(function ($query) {
-                $query->whereNull('start_date')
-                    ->orWhere('start_date', '<=', now());
-            })
-            ->where(function ($query) {
-                $query->whereNull('end_date')
-                    ->orWhere('end_date', '>=', now());
-            })
             ->with(['pickupLocation', 'dropoffLocation', 'vehicle'])
             ->get();
 
-        // Get unique IDs from route fares
         $pickupLocationIds = $routeFares->pluck('pickup_id')->unique();
         $dropoffLocationIds = $routeFares->pluck('dropoff_id')->unique();
         $vehicleIds = $routeFares->pluck('vehicle_id')->unique();
 
-        // Get filtered data
         $pickupLocations = PickUpLocation::whereIn('id', $pickupLocationIds)
             ->where('status', 'active')
             ->orderBy('pickup_location')
@@ -462,8 +534,8 @@ class BookingCreate extends Component
             ->orderBy('drop_off_location')
             ->get();
 
-        $vehicles = CarDetails::whereIn('id', $vehicleIds)
-            ->orderBy('name')
+        // Get ALL vehicles for dynamic filtering
+        $vehicles = CarDetails::orderBy('name')
             ->get();
 
         $cities = City::where('status', 1)
@@ -475,7 +547,8 @@ class BookingCreate extends Component
             ->orderBy('name')
             ->get();
 
-        return view('livewire.admin.booking.booking-create', [
+        return view('livewire.admin.booking.booking-edit', [
+            'booking' => $this->booking,
             'routeFares' => $routeFares,
             'pickupLocations' => $pickupLocations,
             'dropoffLocations' => $dropoffLocations,

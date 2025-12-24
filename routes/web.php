@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdditionalController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\CarController;
 use App\Http\Controllers\Admin\DashboardController;
@@ -56,21 +57,18 @@ Route::prefix('admin')->middleware(['auth', 'verified'])->group(function () {
     Route::controller(HotelController::class)->group(function () {
         Route::get('hotels', 'index')->name('hotel.index');
     });
+    Route::get('additional-charges', function () {
+        return view('admin.additional_charges.index');
+    })->name('additional-charges.index');
     Route::controller(BookingController::class)->group(function () {
         Route::get('booking', 'index')->name('booking.index');
         Route::get('booking/create', 'create')->name('booking.create');
-
+        Route::get('booking/{id}/edit', 'edit')->name('booking.edit');
+    });
+    Route::controller(AdditionalController::class)->group(function () {
+        Route::get('additional', 'index')->name('additional.index');
     });
 });
 
-// Route::view('/', 'welcome');
-
-// Route::view('dashboard', 'dashboard')
-//     ->middleware(['auth', 'verified'])
-//     ->name('dashboard');
-
-// Route::view('profile', 'profile')
-//     ->middleware(['auth'])
-//     ->name('profile');
 
 require __DIR__ . '/auth.php';

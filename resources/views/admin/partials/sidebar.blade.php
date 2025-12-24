@@ -27,6 +27,7 @@
                             <li><a href="{{ route('cities.index') }}">Cities</a></li>
                             <li><a href="{{ route('hotel.index') }}">Hotels</a></li>
                             <li><a href="{{ route('booking.index') }}">Bookings</a></li>
+                            <li><a href="{{ route('additional.index') }}">Additional Service</a></li>
 
                         </ul>
                     </li>

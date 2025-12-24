@@ -85,7 +85,7 @@
                                                     </span>
                                                 </td>
                                                 <td>
-                                                    <a href="{{ route('booking-list.edit', $booking->id) }}"
+                                                    <a href="{{ route('booking.edit', $booking->id) }}"
                                                         class="btn btn-sm btn-outline-secondary me-1">
                                                         <i class="fas fa-edit"></i>
                                                     </a>
