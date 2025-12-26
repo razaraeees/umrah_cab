@@ -31,9 +31,24 @@ class Bookings extends Model
         'arrival_departure_time',
         'extra_information',
         'booking_status',
+        'total_amount',
+        'discount_amount',
         'price',
-        'recived_paymnet', 
+        'recived_paymnet',
     ];
+
+
+    public function additionalServices()
+    {
+        return $this->belongsToMany(
+            AdditionalService::class,
+            'booking_additional_service',
+            'booking_id',                 
+            'additional_service_id'       
+        )->withPivot('amount')->withTimestamps();
+    }
+
+
 
     public function pickupLocation()
     {
@@ -49,6 +64,4 @@ class Bookings extends Model
     {
         return $this->belongsTo(CarDetails::class, 'vehicle_id');
     }
-
-
 }

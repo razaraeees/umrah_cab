@@ -8,6 +8,13 @@
                 </div>
             @endif
 
+            @if (session()->has('error'))
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+
             <livewire:admin.components.breadcrumbs title="Create Booking" bredcrumb1="Booking Management"
                 bredcrumb2="Create Booking" />
 
@@ -42,14 +49,16 @@
                                                     class="text-danger">*</span></label>
                                             <div class="input-group">
                                                 <span class="input-group-text">+</span>
-                                                <!-- Yeh plus prefix hamesha dikhayega -->
                                                 <input type="tel"
                                                     class="form-control @error('guest_phone') is-invalid @enderror"
                                                     id="guest_phone" wire:model.blur="guest_phone"
-                                                    placeholder="Enter phone number" @blur="copyToWhatsappIfChecked()">
+                                                    placeholder="923001234567"
+                                                    @blur="copyToWhatsappIfChecked()"
+                                                    maxlength="15">
                                             </div>
+                                            <small class="text-muted">Enter with country code (e.g., 923001234567)</small>
                                             @error('guest_phone')
-                                                <span class="text-danger">{{ $message }}</span>
+                                                <span class="text-danger d-block">{{ $message }}</span>
                                             @enderror
                                         </div>
                                     </div>
@@ -62,7 +71,9 @@
                                                 <input type="tel"
                                                     class="form-control @error('guest_whatsapp') is-invalid @enderror"
                                                     id="guest_whatsapp" wire:model.blur="guest_whatsapp"
-                                                    placeholder="Enter WhatsApp number" x-bind:disabled="copyWhatsapp">
+                                                    placeholder="923001234567"
+                                                    x-bind:disabled="copyWhatsapp"
+                                                    maxlength="15">
                                             </div>
                                             <div class="form-check mt-2">
                                                 <input class="form-check-input" type="checkbox"
@@ -77,8 +88,27 @@
                                             @enderror
                                         </div>
                                     </div>
+
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label for="payment_type" class="form-label">Payment Type <span
+                                                    class="text-danger">*</span></label>
+                                            <select
+                                                class="form-select @error('payment_type') is-invalid @enderror"
+                                                id="payment_type" wire:model.blur="payment_type">
+                                                <option value="">Select Payment Type</option>
+                                                <option value="credit">Credit</option>
+                                                <option value="cash">Cash</option>
+                                            </select>
+                                            @error('payment_type')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                        </div>
+                                    </div>
                                 </div>
+                                
                                 <hr>
+                                
                                 <!-- Route Information -->
                                 <div class="row mt-4">
                                     <div class="col-12">
@@ -91,14 +121,15 @@
                                                     class="text-danger">*</span></label>
                                             <select
                                                 class="form-select @error('pickup_location_id') is-invalid @enderror"
-                                                id="pickup_location_id" wire:model.live="pickup_location_id"
+                                                id="pickup_location_id" wire:model.blur="pickup_location_id"
                                                 @change="handlePickupChange($event)">
                                                 <option value="">Select Pickup Location</option>
                                                 @foreach ($pickupLocations as $location)
                                                     <option value="{{ $location->id }}"
                                                         data-type="{{ $location->type }}"
                                                         data-name="{{ $location->pickup_location }}">
-                                                        {{ $location->pickup_location }}</option>
+                                                        {{ $location->pickup_location }} ({{ $location->type }})
+                                                    </option>
                                                 @endforeach
                                             </select>
                                             @error('pickup_location_id')
@@ -107,13 +138,13 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-6" x-show="showPickupHotel">
                                         <div class="mb-3">
                                             <label for="pickup_city_id" class="form-label">Pickup City</label>
                                             <select class="form-select @error('pickup_city_id') is-invalid @enderror"
-                                                id="pickup_city_id" wire:model.live="pickup_city_id"
+                                                id="pickup_city_id" wire:model.blur="pickup_city_id"
                                                 @change="filterPickupHotels()">
-                                                <option value="">Select City</option>
+                                                <option value="">Select City First</option>
                                                 @foreach ($cities as $city)
                                                     <option value="{{ $city->id }}">{{ $city->name }}</option>
                                                 @endforeach
@@ -128,14 +159,14 @@
                                         <div class="mb-3">
                                             <label for="pickup_hotel_name" class="form-label">Pickup Hotel Name</label>
                                             <select class="form-select @error('pickup_hotel_name') is-invalid @enderror"
-                                                id="pickup_hotel_name" wire:model.blur="pickup_hotel_name">
+                                                id="pickup_hotel_name" wire:model.blur="pickup_hotel_name"
+                                                :disabled="!$wire.pickup_city_id">
                                                 <option value="">Select Hotel</option>
                                                 <template x-for="hotel in filteredPickupHotels" :key="hotel.id">
                                                     <option :value="hotel.name" x-text="hotel.name"></option>
                                                 </template>
                                             </select>
-                                            <small class="text-muted">Select city first, then hotel will be
-                                                available</small>
+                                            <small class="text-muted">Select city first, then hotel will be available</small>
                                             @error('pickup_hotel_name')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
@@ -148,29 +179,31 @@
                                                     class="text-danger">*</span></label>
                                             <select
                                                 class="form-select @error('dropoff_location_id') is-invalid @enderror"
-                                                id="dropoff_location_id" wire:model.live="dropoff_location_id"
-                                                @change="handleDropoffChange($event)">
+                                                id="dropoff_location_id" wire:model.blur="dropoff_location_id"
+                                                @change="handleDropoffChange($event)"
+                                                :disabled="!$wire.pickup_location_id">
                                                 <option value="">Select Dropoff Location</option>
-                                                <template x-for="location in filteredDropoffLocations"
-                                                    :key="location.id">
+                                                <template x-for="location in filteredDropoffLocations" :key="location.id">
                                                     <option :value="location.id" :data-type="location.type"
                                                         :data-name="location.drop_off_location"
-                                                        x-text="location.drop_off_location"></option>
+                                                        x-text="location.drop_off_location + ' (' + location.type + ')'">
+                                                    </option>
                                                 </template>
                                             </select>
+                                            <small class="text-muted" x-show="!$wire.pickup_location_id">Select pickup location first</small>
                                             @error('dropoff_location_id')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
                                         </div>
                                     </div>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-6" x-show="showDropoffHotel">
                                         <div class="mb-3">
                                             <label for="dropoff_city_id" class="form-label">Dropoff City</label>
                                             <select class="form-select @error('dropoff_city_id') is-invalid @enderror"
                                                 id="dropoff_city_id" wire:model.live="dropoff_city_id"
                                                 @change="filterDropoffHotels()">
-                                                <option value="">Select City</option>
+                                                <option value="">Select City First</option>
                                                 @foreach ($cities as $city)
                                                     <option value="{{ $city->id }}">{{ $city->name }}</option>
                                                 @endforeach
@@ -183,19 +216,17 @@
 
                                     <div class="col-md-6" x-show="showDropoffHotel">
                                         <div class="mb-3">
-                                            <label for="dropoff_hotel_name" class="form-label">Dropoff Hotel
-                                                Name</label>
+                                            <label for="dropoff_hotel_name" class="form-label">Dropoff Hotel Name</label>
                                             <select
                                                 class="form-select @error('dropoff_hotel_name') is-invalid @enderror"
-                                                id="dropoff_hotel_name" wire:model.blur="dropoff_hotel_name">
+                                                id="dropoff_hotel_name" wire:model.blur="dropoff_hotel_name"
+                                                :disabled="!$wire.dropoff_city_id">
                                                 <option value="">Select Hotel</option>
-                                                <template x-for="hotel in filteredDropoffHotels"
-                                                    :key="hotel.id">
+                                                <template x-for="hotel in filteredDropoffHotels" :key="hotel.id">
                                                     <option :value="hotel.name" x-text="hotel.name"></option>
                                                 </template>
                                             </select>
-                                            <small class="text-muted">Select city first, then hotel will be
-                                                available</small>
+                                            <small class="text-muted">Select city first, then hotel will be available</small>
                                             @error('dropoff_hotel_name')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
@@ -204,7 +235,6 @@
                                 </div>
 
                                 <hr>
-
 
                                 <!-- Vehicle Information -->
                                 <div class="row mt-4">
@@ -218,7 +248,8 @@
                                                     class="text-danger">*</span></label>
                                             <select class="form-select @error('vehicle_id') is-invalid @enderror"
                                                 id="vehicle_id" wire:model.live="vehicle_id"
-                                                @change="handleVehicleChange($event)">
+                                                @change="handleVehicleChange($event)"
+                                                :disabled="!$wire.pickup_location_id || !$wire.dropoff_location_id">
                                                 <option value="">Select Vehicle</option>
                                                 <template x-for="vehicle in filteredVehicles" :key="vehicle.id">
                                                     <option :value="vehicle.id"
@@ -228,6 +259,9 @@
                                                     </option>
                                                 </template>
                                             </select>
+                                            <small class="text-muted" x-show="!$wire.pickup_location_id || !$wire.dropoff_location_id">
+                                                Select pickup and dropoff locations first
+                                            </small>
                                             @error('vehicle_id')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
@@ -236,18 +270,84 @@
 
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="price" class="form-label">Price (SAR) <span
+                                            <label for="price" class="form-label">Base Price (SAR) <span
                                                     class="text-danger">*</span></label>
                                             <input type="number" step="0.01"
                                                 class="form-control @error('price') is-invalid @enderror"
-                                                id="price" wire:model.blur="price" placeholder="Enter price"
-                                                x-bind:value="calculatedPrice" readonly>
+                                                id="price" 
+                                                x-bind:value="calculatedPrice"
+                                                placeholder="Auto-calculated"
+                                                readonly>
+                                            <small class="text-muted">Price will be calculated automatically</small>
                                             @error('price')
-                                                <span class="text-danger">{{ $message }}</span>
+                                                <span class="text-danger d-block">{{ $message }}</span>
                                             @enderror
                                         </div>
                                     </div>
+
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Additional Services</label>
+                                            <div class="row g-3">
+                                                @foreach($additionalServicesList as $service)
+                                                    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                                                        <div class="form-check card-radio">
+                                                            <input class="form-check-input" type="checkbox" 
+                                                                   id="service_{{ $service->id }}" 
+                                                                   wire:model.live="selectedServices" 
+                                                                   value="{{ $service->id }}">
+                                                            <label class="form-check-label" for="service_{{ $service->id }}">
+                                                                <span class="fs-14 text-wrap">{{ $service->services }}</span>
+                                                                <span class="text-muted d-block small">
+                                                                    @if($service->charges_type == 'percentage')
+                                                                        {{ $service->charge_value }}%
+                                                                        <span x-show="$wire.price">
+                                                                            (<span x-text="({{ $service->charge_value }} * $wire.price / 100).toFixed(2)"></span> SAR)
+                                                                        </span>
+                                                                    @else
+                                                                        {{ number_format($service->charge_value, 2) }} SAR
+                                                                    @endif
+                                                                </span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="discount_amount" class="form-label">Discount Amount (SAR)</label>
+                                            <input type="number" step="0.01" min="0"
+                                                class="form-control @error('discountAmount') is-invalid @enderror"
+                                                id="discount_amount" wire:model.live="discountAmount"
+                                                placeholder="Enter discount amount"
+                                                :max="$wire.totalAmount"
+                                                @input="validateDiscount()">
+                                            @error('discountAmount')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                            <small class="text-muted" x-show="$wire.discountAmount > $wire.totalAmount" class="text-danger">
+                                                Discount cannot exceed total amount
+                                            </small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <div class="alert alert-info d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="mb-0">Total Amount:</h5>
+                                                <small class="text-muted">Base Price + Additional Services - Discount</small>
+                                            </div>
+                                            <h3 class="mb-0 text-primary">
+                                                {{ number_format($totalAmount, 2) }} 
+                                                <small class="fs-6 text-muted">SAR</small>
+                                            </h3>
+                                        </div>
+                                    </div>
                                 </div>
+                                
                                 <hr>
 
                                 <!-- Passenger Information -->
@@ -288,7 +388,8 @@
                                             <label for="no_of_infants" class="form-label">Infants</label>
                                             <input type="number"
                                                 class="form-control @error('no_of_infants') is-invalid @enderror"
-                                                id="no_of_infants" wire:model.live="no_of_infants" min="0">
+                                                id="no_of_infants" wire:model.live="no_of_infants" min="0"
+                                                @input="validateCapacity()">
                                             @error('no_of_infants')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
@@ -298,12 +399,19 @@
                                     <div class="col-md-3">
                                         <div class="mb-3">
                                             <label class="form-label">Total Passengers</label>
-                                            <div class="form-control bg-light" x-text="totalPassengers"></div>
+                                            <div class="form-control bg-light" 
+                                                 :class="{'border-danger': totalPassengers > vehicleCapacity}"
+                                                 x-text="totalPassengers">
+                                            </div>
+                                            <small class="text-danger" x-show="totalPassengers > vehicleCapacity">
+                                                Exceeds capacity: <span x-text="vehicleCapacity"></span>
+                                            </small>
                                         </div>
                                     </div>
                                 </div>
 
                                 <hr>
+                                
                                 <!-- Schedule Information -->
                                 <div class="row mt-4">
                                     <div class="col-12">
@@ -337,11 +445,13 @@
                                         </div>
                                     </div>
                                 </div>
-                                {{-- <hr>     --}}
+
                                 <!-- Flight Information -->
-                                <div class="row mt-4" x-show="showFlightSection">
+                                <div class="row mt-4" x-show="showFlightSection" x-transition>
                                     <div class="col-12">
-                                        <h4 class="card-title mb-4">Flight Information (Optional)</h4>
+                                        <h4 class="card-title mb-4">
+                                            <i class="fas fa-plane me-2"></i>Flight Information (Optional)
+                                        </h4>
                                     </div>
 
                                     <div class="col-md-6">
@@ -350,7 +460,7 @@
                                             <input type="text"
                                                 class="form-control @error('airline_name') is-invalid @enderror"
                                                 id="airline_name" wire:model.blur="airline_name"
-                                                placeholder="Enter airline name">
+                                                placeholder="e.g., Emirates, Qatar Airways">
                                             @error('airline_name')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
@@ -363,7 +473,7 @@
                                             <input type="text"
                                                 class="form-control @error('flight_number') is-invalid @enderror"
                                                 id="flight_number" wire:model.blur="flight_number"
-                                                placeholder="Enter flight number">
+                                                placeholder="e.g., EK521">
                                             @error('flight_number')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
@@ -372,11 +482,11 @@
 
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="arrival_departure_date" class="form-label">Arrival/Departure
-                                                Date</label>
+                                            <label for="arrival_departure_date" class="form-label">Arrival/Departure Date</label>
                                             <input type="date"
                                                 class="form-control @error('arrival_departure_date') is-invalid @enderror"
-                                                min="{{ now()->format('Y-m-d') }}" id="arrival_departure_date"
+                                                min="{{ now()->format('Y-m-d') }}" 
+                                                id="arrival_departure_date"
                                                 wire:model.blur="arrival_departure_date">
                                             @error('arrival_departure_date')
                                                 <span class="text-danger">{{ $message }}</span>
@@ -386,8 +496,7 @@
 
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="arrival_departure_time" class="form-label">Arrival/Departure
-                                                Time</label>
+                                            <label for="arrival_departure_time" class="form-label">Arrival/Departure Time</label>
                                             <input type="time"
                                                 class="form-control @error('arrival_departure_time') is-invalid @enderror"
                                                 id="arrival_departure_time" wire:model.blur="arrival_departure_time">
@@ -400,8 +509,10 @@
                                     <div class="col-12">
                                         <div class="mb-3">
                                             <label for="flight_details" class="form-label">Flight Details</label>
-                                            <textarea class="form-control @error('flight_details') is-invalid @enderror" id="flight_details"
-                                                wire:model.blur="flight_details" rows="2" placeholder="Enter flight details"></textarea>
+                                            <textarea class="form-control @error('flight_details') is-invalid @enderror" 
+                                                id="flight_details"
+                                                wire:model.blur="flight_details" rows="2" 
+                                                placeholder="Any additional flight information..."></textarea>
                                             @error('flight_details')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
@@ -410,6 +521,7 @@
                                 </div>
 
                                 <hr>
+                                
                                 <!-- Additional Information -->
                                 <div class="row mt-4">
                                     <div class="col-12">
@@ -434,24 +546,30 @@
 
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="recived_paymnet" class="form-label">Received Payment
-                                                (SAR)</label>
-                                            <input type="number" step="0.01"
-                                                class="form-control @error('recived_paymnet') is-invalid @enderror"
-                                                id="recived_paymnet" wire:model.blur="recived_paymnet"
-                                                placeholder="Enter received payment">
-                                            @error('recived_paymnet')
-                                                <span class="text-danger">{{ $message }}</span>
+                                            <label for="received_payment" class="form-label">Received Payment (SAR)</label>
+                                            <input type="number" step="0.01" min="0"
+                                                class="form-control @error('received_payment') is-invalid @enderror"
+                                                id="received_payment" wire:model.blur="received_payment"
+                                                placeholder="Enter received payment"
+                                                :max="$wire.totalAmount">
+                                            <small class="text-muted">
+                                                <span x-show="$wire.received_payment > 0">
+                                                    Remaining: <span x-text="($wire.totalAmount - $wire.received_payment).toFixed(2)"></span> SAR
+                                                </span>
+                                            </small>
+                                            @error('received_payment')
+                                                <span class="text-danger d-block">{{ $message }}</span>
                                             @enderror
                                         </div>
                                     </div>
 
                                     <div class="col-12">
                                         <div class="mb-3">
-                                            <label for="extra_information" class="form-label">Extra
-                                                Information</label>
-                                            <textarea class="form-control @error('extra_information') is-invalid @enderror" id="extra_information"
-                                                wire:model.blur="extra_information" rows="3" placeholder="Enter any additional information"></textarea>
+                                            <label for="extra_information" class="form-label">Extra Information</label>
+                                            <textarea class="form-control @error('extra_information') is-invalid @enderror" 
+                                                id="extra_information"
+                                                wire:model.blur="extra_information" rows="3" 
+                                                placeholder="Any special requests or additional notes..."></textarea>
                                             @error('extra_information')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
@@ -466,7 +584,8 @@
                                             <a href="{{ route('booking.index') }}" class="btn btn-secondary">
                                                 <i class="fas fa-times me-2"></i>Cancel
                                             </a>
-                                            <button type="submit" class="btn btn-primary">
+                                            <button type="submit" class="btn btn-primary" 
+                                                    :disabled="totalPassengers > vehicleCapacity || !$wire.price">
                                                 <i class="fas fa-save me-2"></i>Save Booking
                                             </button>
                                         </div>
@@ -491,7 +610,7 @@
             pickupLocations: @json($pickupLocations),
             dropoffLocations: @json($dropoffLocations),
 
-            // ===== Alpine UI State ==
+            // ===== Alpine UI State =====
             copyWhatsapp: false,
             showPickupHotel: false,
             showDropoffHotel: false,
@@ -515,6 +634,11 @@
                 this.filteredDropoffHotels = this.hotels;
                 this.filteredDropoffLocations = this.dropoffLocations;
                 this.filteredVehicles = this.vehicles;
+
+                // Watch for Livewire price changes
+                this.$watch('$wire.price', value => {
+                    this.calculatedPrice = value;
+                });
             },
 
             // ===== COMPUTED =====
@@ -547,6 +671,7 @@
 
                 if (type !== 'Hotel') {
                     this.$wire.pickup_hotel_name = '';
+                    this.$wire.pickup_city_id = '';
                 }
 
                 if (type !== 'Airport') {
@@ -574,6 +699,7 @@
 
                 if (type !== 'Hotel') {
                     this.$wire.dropoff_hotel_name = '';
+                    this.$wire.dropoff_city_id = '';
                 }
 
                 this.updateVehicleFilters();
@@ -611,7 +737,11 @@
             // ===== MAIN FILTER LOGIC =====
             updateDropoffAndVehicleFilters() {
                 const pickupId = this.$wire.pickup_location_id;
-                if (!pickupId) return;
+                if (!pickupId) {
+                    this.filteredDropoffLocations = this.dropoffLocations;
+                    this.filteredVehicles = this.vehicles;
+                    return;
+                }
 
                 const validDropoffs = new Set();
                 const validVehicles = new Set();
@@ -631,15 +761,18 @@
                     validVehicles.has(v.id)
                 );
 
+                // Reset if current selection is invalid
                 if (!validDropoffs.has(parseInt(this.$wire.dropoff_location_id))) {
                     this.$wire.dropoff_location_id = '';
                     this.$wire.dropoff_location_name = '';
                     this.$wire.dropoff_location_type = '';
+                    this.showDropoffHotel = false;
                 }
 
                 if (!validVehicles.has(parseInt(this.$wire.vehicle_id))) {
                     this.$wire.vehicle_id = '';
                     this.$wire.vehicle_name = '';
+                    this.calculatedPrice = '';
                 }
             },
 
@@ -647,7 +780,11 @@
             updateVehicleFilters() {
                 const pickupId = this.$wire.pickup_location_id;
                 const dropoffId = this.$wire.dropoff_location_id;
-                if (!pickupId || !dropoffId) return;
+                
+                if (!pickupId || !dropoffId) {
+                    this.filteredVehicles = this.vehicles;
+                    return;
+                }
 
                 const validVehicles = new Set();
 
@@ -661,6 +798,7 @@
                     validVehicles.has(v.id)
                 );
 
+                // Auto-select if only one vehicle available
                 if (validVehicles.size === 1) {
                     const vehicleId = [...validVehicles][0];
                     this.$wire.vehicle_id = vehicleId;
@@ -670,6 +808,11 @@
                         this.vehicleCapacity = vehicle.seating_capacity;
                         this.$wire.vehicle_name = vehicle.name + ' - ' + vehicle.model_variant;
                     }
+                } else if (!validVehicles.has(parseInt(this.$wire.vehicle_id))) {
+                    // Reset if current selection is invalid
+                    this.$wire.vehicle_id = '';
+                    this.$wire.vehicle_name = '';
+                    this.calculatedPrice = '';
                 }
             },
 
@@ -694,13 +837,34 @@
                 if (fare) {
                     this.calculatedPrice = fare.amount;
                     this.$wire.price = fare.amount;
+                } else {
+                    this.calculatedPrice = '';
+                    this.$wire.price = '';
                 }
             },
 
             // ===== CAPACITY VALIDATION =====
             validateCapacity() {
-                if (this.totalPassengers > this.vehicleCapacity) {
-                    alert('Passengers exceed vehicle capacity!');
+                if (this.totalPassengers > this.vehicleCapacity && this.vehicleCapacity > 0) {
+                    // Alert user
+                    setTimeout(() => {
+                        if (this.totalPassengers > this.vehicleCapacity) {
+                            alert(`Total passengers (${this.totalPassengers}) exceed vehicle capacity (${this.vehicleCapacity})!`);
+                        }
+                    }, 300);
+                }
+            },
+
+            // ===== DISCOUNT VALIDATION =====
+            validateDiscount() {
+                const discount = parseFloat(this.$wire.discountAmount) || 0;
+                const total = parseFloat(this.$wire.totalAmount) || 0;
+                
+                if (discount > total) {
+                    setTimeout(() => {
+                        alert('Discount amount cannot exceed total amount!');
+                        this.$wire.discountAmount = total;
+                    }, 300);
                 }
             }
         }

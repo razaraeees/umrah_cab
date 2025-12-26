@@ -13,7 +13,7 @@ class DriverIndex extends Component
     public $search;
     public $perPage = 10;
 
-    protected $paginationTheme = 'bootstrap';
+    protected $paginationTheme = 'bootstrap';   
 
     public function updatingSearch(){
         $this->resetPage();

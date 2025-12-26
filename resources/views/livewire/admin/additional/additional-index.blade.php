@@ -60,7 +60,7 @@
                                                     <span class="badge badge-status-active">{{ ucfirst($service->type ?? 'N/A') }}</span>
                                                 </td>
                                                 <td>
-                                                    @if ($service->status == 'Active')
+                                                    @if (strtolower($service->status) == 'active')
                                                         <span class="badge badge-status-active">Active</span>
                                                     @else
                                                         <span class="badge badge-status-inactive">Inactive</span>
@@ -71,9 +71,9 @@
                                                         wire:click="edit({{ $service->id }})">
                                                         <i class="fas fa-edit"></i>
                                                     </button>
-                                                    <button type="button" class="btn btn-sm btn-outline-{{ $service->status == 'Active' ? 'warning' : 'success' }} me-1"
+                                                    <button type="button" class="btn btn-sm btn-outline-{{ strtolower($service->status) == 'active' ? 'warning' : 'success' }} me-1"
                                                         wire:click="toggleStatus({{ $service->id }})">
-                                                        <i class="fas fa-{{ $service->status == 'Active' ? 'eye-slash' : 'eye' }}"></i>
+                                                        <i class="fas fa-{{ strtolower($service->status) == 'active' ? 'eye-slash' : 'eye' }}"></i>
                                                     </button>
                                                     <button type="button" class="btn btn-sm btn-outline-danger" x-data
                                                         @click="

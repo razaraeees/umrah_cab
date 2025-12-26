@@ -22,6 +22,13 @@ class AdditionalService extends Model
         'status' => 'integer',
     ];
 
+    public function booking()
+    {
+        return $this->belongsToMany(Bookings::class, 'booking_additional_service')
+                    ->withPivot('amount')
+                    ->withTimestamps();
+    }
+
     public function getStatusAttribute($value)
     {
         return $value ? 'Active' : 'Inactive';

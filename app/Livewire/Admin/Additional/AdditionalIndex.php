@@ -99,7 +99,7 @@ class AdditionalIndex extends Component
         $this->charges_type = $service->charges_type;
         $this->charge_value = $service->charge_value;
         $this->type = $service->type;
-        $this->status = $service->status;
+        $this->status = strtolower($service->status);
         
         $this->editMode = true;
         $this->showModal = true;
@@ -115,7 +115,7 @@ class AdditionalIndex extends Component
     public function toggleStatus($id)
     {
         $service = AdditionalService::findOrFail($id);
-        $service->status = $service->status === 'active' ? 'inactive' : 'active';
+        $service->status = strtolower($service->status) === 'active' ? 'inactive' : 'active';
         $service->save();
         $this->dispatch('success', 'Status updated successfully!');
     }

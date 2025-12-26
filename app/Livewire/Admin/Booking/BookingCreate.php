@@ -11,6 +11,7 @@ use App\Models\DropLocation;
 use App\Models\Hotel;
 use App\Models\City;
 use App\Models\RouteFares;
+use App\Models\AdditionalService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -19,10 +20,11 @@ class BookingCreate extends Component
     // Customer Information
     #[Validate('required|string|max:255')]
     public $guest_name = '';
-    #[Validate('required|string|max:20|regex:/^[0-9]+$/')]
+    
+    #[Validate('required|string|max:20|regex:/^\+?[0-9]{10,15}$/')]
     public $guest_phone = '';
 
-    #[Validate('nullable|string|max:20|regex:/^[0-9]+$/')]
+    #[Validate('nullable|string|max:20|regex:/^\+?[0-9]{10,15}$/')]
     public $guest_whatsapp = '';
 
     // Route Information
@@ -99,10 +101,21 @@ class BookingCreate extends Component
     public $booking_status = 'pending';
 
     #[Validate('nullable|numeric|min:0')]
-    public $recived_paymnet = '';
+    public $received_payment = 0;
 
     #[Validate('nullable|string|max:2000')]
     public $extra_information = '';
+
+    #[Validate('required|in:credit,cash')]
+    public $payment_type = 'credit';
+
+    // Additional Services & Calculation
+    public $additionalServicesList = [];
+    public $selectedServices = [];
+    public $totalAmount = 0;
+    
+    #[Validate('nullable|numeric|min:0')]
+    public $discountAmount = 0;
 
     /**
      * Mount component with default values
@@ -112,6 +125,41 @@ class BookingCreate extends Component
         $this->pickup_date = now()->addDay()->format('Y-m-d');
         $this->pickup_time = '09:00';
         $this->calculateTotalPassengers();
+        $this->loadAdditionalServices();
+    }
+
+    /**
+     * Load additional services
+     */
+    private function loadAdditionalServices()
+    {
+        $this->additionalServicesList = AdditionalService::where('status', 1)
+            ->orderBy('services')
+            ->get();
+    }
+
+    /**
+     * Watch for selected services changes
+     */
+    public function updatedSelectedServices()
+    {
+        $this->calculateTotalAmount();
+    }
+
+    /**
+     * Watch for discount changes
+     */
+    public function updatedDiscountAmount()
+    {
+        $this->calculateTotalAmount();
+    }
+
+    /**
+     * Watch for price changes
+     */
+    public function updatedPrice()
+    {
+        $this->calculateTotalAmount();
     }
 
     /**
@@ -126,20 +174,24 @@ class BookingCreate extends Component
 
         $pickupLocation = PickUpLocation::find($value);
 
-        if ($pickupLocation) {
-            $this->pickup_location_name = $pickupLocation->pickup_location;
-            $this->pickup_location_type = $pickupLocation->type;
+        if (!$pickupLocation) {
+            $this->addError('pickup_location_id', 'Invalid pickup location selected.');
+            $this->resetPickupData();
+            return;
+        }
 
-            // Clear hotel name if not hotel type
-            if ($this->pickup_location_type !== 'Hotel') {
-                $this->pickup_hotel_name = '';
-                $this->pickup_city_id = '';
-            }
+        $this->pickup_location_name = $pickupLocation->pickup_location;
+        $this->pickup_location_type = $pickupLocation->type;
 
-            // Clear flight info if not airport
-            if ($this->pickup_location_type !== 'Airport') {
-                $this->clearFlightInfo();
-            }
+        // Clear hotel name if not hotel type
+        if ($this->pickup_location_type !== 'Hotel') {
+            $this->pickup_hotel_name = '';
+            $this->pickup_city_id = '';
+        }
+
+        // Clear flight info if not airport
+        if ($this->pickup_location_type !== 'Airport') {
+            $this->clearFlightInfo();
         }
 
         // Reset dependent fields
@@ -158,21 +210,28 @@ class BookingCreate extends Component
 
         $dropoffLocation = DropLocation::find($value);
 
-        if ($dropoffLocation) {
-            $this->dropoff_location_name = $dropoffLocation->drop_off_location;
-            $this->dropoff_location_type = $dropoffLocation->type;
+        if (!$dropoffLocation) {
+            $this->addError('dropoff_location_id', 'Invalid dropoff location selected.');
+            $this->resetDropoffData();
+            return;
+        }
 
-            // Clear hotel name if not hotel type
-            if ($this->dropoff_location_type !== 'Hotel') {
-                $this->dropoff_hotel_name = '';
-                $this->dropoff_city_id = '';
-            }
+        $this->dropoff_location_name = $dropoffLocation->drop_off_location;
+        $this->dropoff_location_type = $dropoffLocation->type;
+
+        // Clear hotel name if not hotel type
+        if ($this->dropoff_location_type !== 'Hotel') {
+            $this->dropoff_hotel_name = '';
+            $this->dropoff_city_id = '';
         }
 
         // Reset vehicle and price
-        $this->vehicle_id = '';
-        $this->vehicle_name = '';
-        $this->price = '';
+        $this->resetVehicleData();
+        
+        // Try to calculate price if vehicle is already selected
+        if ($this->vehicle_id) {
+            $this->calculatePrice();
+        }
     }
 
     /**
@@ -181,16 +240,23 @@ class BookingCreate extends Component
     public function updatedVehicleId($value)
     {
         if (!$value) {
-            $this->vehicle_name = '';
-            $this->price = '';
+            $this->resetVehicleData();
             return;
         }
 
         $vehicle = CarDetails::find($value);
 
-        if ($vehicle) {
-            $this->vehicle_name = "{$vehicle->name} - {$vehicle->model_variant}";
-            $this->validatePassengerCapacity($vehicle->seating_capacity);
+        if (!$vehicle) {
+            $this->addError('vehicle_id', 'Invalid vehicle selected.');
+            $this->resetVehicleData();
+            return;
+        }
+
+        $this->vehicle_name = "{$vehicle->name} - {$vehicle->model_variant}";
+        
+        // Validate passenger capacity
+        if (!$this->validatePassengerCapacity($vehicle->seating_capacity)) {
+            return;
         }
 
         $this->calculatePrice();
@@ -201,8 +267,16 @@ class BookingCreate extends Component
      */
     public function calculatePrice()
     {
+        // Reset price and errors
+        $this->resetErrorBag('price');
+        
         if (!$this->pickup_location_id || !$this->dropoff_location_id || !$this->vehicle_id) {
             $this->price = '';
+            $this->totalAmount = 0;
+            
+            if ($this->vehicle_id && (!$this->pickup_location_id || !$this->dropoff_location_id)) {
+                $this->addError('price', 'Please select both pickup and dropoff locations first.');
+            }
             return;
         }
 
@@ -220,11 +294,53 @@ class BookingCreate extends Component
             })
             ->first();
 
-        $this->price = $routeFare ? $routeFare->amount : '';
-
-        if (!$this->price) {
-            $this->addError('price', 'No fare found for this route and vehicle combination.');
+        if (!$routeFare) {
+            $this->price = '';
+            $this->totalAmount = 0;
+            $this->addError('price', 'No fare available for this route and vehicle combination. Please contact admin.');
+            return;
         }
+
+        $this->price = $routeFare->amount;
+        $this->calculateTotalAmount();
+    }
+
+    /**
+     * Calculate total amount including services and discount
+     */
+    public function calculateTotalAmount()
+    {
+        // If price is not set, reset total
+        if (!$this->price || $this->price <= 0) {
+            $this->totalAmount = 0;
+            return;
+        }
+
+        $basePrice = (float) $this->price;
+        $additionalCharges = 0;
+
+        // Calculate additional service charges
+        foreach ($this->selectedServices as $serviceId) {
+            $service = $this->additionalServicesList->firstWhere('id', $serviceId);
+            if ($service) {
+                $additionalCharges += $this->calculateServiceCharge($service, $basePrice);
+            }
+        }
+
+        // Calculate total with discount
+        $discount = min((float) $this->discountAmount, $basePrice + $additionalCharges);
+        $this->totalAmount = max(0, $basePrice + $additionalCharges - $discount);
+    }
+
+    /**
+     * Calculate individual service charge
+     */
+    private function calculateServiceCharge($service, $basePrice)
+    {
+        if ($service->charges_type === 'percentage') {
+            return ($basePrice * $service->charge_value / 100);
+        }
+        return $service->charge_value;
     }
 
     /**
@@ -233,10 +349,19 @@ class BookingCreate extends Component
     private function validatePassengerCapacity($vehicleCapacity)
     {
         $this->calculateTotalPassengers();
+        $this->resetErrorBag(['no_of_adults', 'no_of_children', 'no_of_infants']);
 
         if ($this->total_passengers > $vehicleCapacity) {
-            $this->addError('no_of_adults', "Total passengers ({$this->total_passengers}) exceed vehicle capacity ({$vehicleCapacity})");
+            $this->addError('no_of_adults', "Total passengers ({$this->total_passengers}) exceed vehicle capacity ({$vehicleCapacity}).");
+            return false;
         }
+
+        if ($this->total_passengers < 1) {
+            $this->addError('no_of_adults', 'At least one passenger is required.');
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -266,8 +391,8 @@ class BookingCreate extends Component
     private function calculateTotalPassengers()
     {
         $this->total_passengers = (int) $this->no_of_adults
-            + (int) $this->no_of_children
-            + (int) $this->no_of_infants;
+            + (int) $this->no_of_children;
+          
     }
 
     /**
@@ -301,14 +426,8 @@ class BookingCreate extends Component
      */
     private function resetDropoffAndVehicleData()
     {
-        $this->dropoff_location_id = '';
-        $this->dropoff_location_name = '';
-        $this->dropoff_location_type = '';
-        $this->dropoff_city_id = '';
-        $this->dropoff_hotel_name = '';
-        $this->vehicle_id = '';
-        $this->vehicle_name = '';
-        $this->price = '';
+        $this->resetDropoffData();
+        $this->resetVehicleData();
     }
 
     /**
@@ -316,10 +435,22 @@ class BookingCreate extends Component
      */
     private function resetDropoffData()
     {
+        $this->dropoff_location_id = '';
         $this->dropoff_location_name = '';
         $this->dropoff_location_type = '';
         $this->dropoff_city_id = '';
         $this->dropoff_hotel_name = '';
+    }
+
+    /**
+     * Reset vehicle data
+     */
+    private function resetVehicleData()
+    {
+        $this->vehicle_id = '';
+        $this->vehicle_name = '';
+        $this->price = '';
+        $this->totalAmount = 0;
     }
 
     /**
@@ -342,79 +473,146 @@ class BookingCreate extends Component
         // Validate all fields
         $this->validate();
 
-        // Additional validation
-        $this->calculateTotalPassengers();
-
-        if ($this->total_passengers < 1) {
-            $this->addError('no_of_adults', 'At least one passenger is required.');
+        // Additional validations
+        if (!$this->additionalValidations()) {
             return;
-        }
-
-        // Validate vehicle capacity one more time
-        if ($this->vehicle_id) {
-            $vehicle = CarDetails::find($this->vehicle_id);
-            if ($vehicle && $this->total_passengers > $vehicle->seating_capacity) {
-                $this->addError('no_of_adults', "Total passengers exceed vehicle capacity.");
-                return;
-            }
         }
 
         try {
             DB::beginTransaction();
 
-            // Format phone numbers
-            $guestPhone = $this->formatPhoneNumber($this->guest_phone);
-            $guestWhatsapp = $this->guest_whatsapp
-                ? $this->formatPhoneNumber($this->guest_whatsapp)
-                : $guestPhone;
-
             // Create booking
-            $booking = Bookings::create([
-                'guest_name' => trim($this->guest_name),
-                'guest_phone' => $guestPhone,
-                'guest_whatsapp' => $guestWhatsapp,
-                'pickup_location_id' => $this->pickup_location_id,
-                'pickup_location_name' => $this->pickup_location_name,
-                'pickup_hotel_name' => $this->pickup_hotel_name,
-                'dropoff_location_id' => $this->dropoff_location_id,
-                'dropoff_location_name' => $this->dropoff_location_name,
-                'dropoff_hotel_name' => $this->dropoff_hotel_name,
-                'vehicle_id' => $this->vehicle_id,
-                'vehicle_name' => $this->vehicle_name,
-                'no_of_children' => $this->no_of_children,
-                'no_of_infants' => $this->no_of_infants,
-                'no_of_adults' => $this->no_of_adults,
-                'total_passengers' => $this->total_passengers,
-                'pickup_date' => $this->pickup_date,
-                'pickup_time' => $this->pickup_time,
-                'airline_name' => $this->airline_name,
-                'flight_number' => $this->flight_number,
-                'flight_details' => $this->flight_details,
-                'arrival_departure_date' => $this->arrival_departure_date,
-                'arrival_departure_time' => $this->arrival_departure_time,
-                'extra_information' => $this->extra_information,
-                'booking_status' => $this->booking_status,
-                'price' => $this->price,
-                'recived_paymnet' => $this->recived_paymnet ?? 0,
-                'created_by' => auth()->id(),
-            ]);
+            $booking = $this->createBooking();
+
+            // Attach additional services
+            $this->attachAdditionalServices($booking);
 
             DB::commit();
 
-            session()->flash('message', "Booking #{$booking->id} created successfully!");
+            // session()->flash('message', "Booking #{$booking->id} created successfully!");
+            $this->dispatch('show-toast', type: 'success', message: 'Booking created successfully!');
+
 
             return redirect()->route('booking.index');
+            
         } catch (\Exception $e) {
             DB::rollBack();
 
             Log::error('Booking creation failed', [
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'trace' => $e->getTraceAsString(),
+                'data' => $this->all()
             ]);
 
-            session()->flash('error', 'Failed to create booking. Please try again.');
+            // session()->flash('error', 'Failed to create booking. Please try again.');
+            $this->dispatch('show-toast', type: 'error', message: 'Failed to create booking. Please try again.');
+            $this->addError('save', 'An error occurred while saving the booking: ' . $e->getMessage());
+        }
+    }
 
-            $this->addError('save', 'An error occurred while saving the booking.');
+    /**
+     * Additional validations before save
+     */
+    private function additionalValidations()
+    {
+        $this->calculateTotalPassengers();
+
+        // Validate minimum passengers
+        if ($this->total_passengers < 1) {
+            $this->addError('no_of_adults', 'At least one passenger is required.');
+            return false;
+        }
+
+        // Validate vehicle capacity
+        if ($this->vehicle_id) {
+            $vehicle = CarDetails::find($this->vehicle_id);
+            if ($vehicle && $this->total_passengers > $vehicle->seating_capacity) {
+                $this->addError('no_of_adults', "Total passengers ({$this->total_passengers}) exceed vehicle capacity ({$vehicle->seating_capacity}).");
+                return false;
+            }
+        }
+
+        // Validate price is set
+        if (!$this->price || $this->price <= 0) {
+            $this->addError('price', 'Valid fare is required. Please select route and vehicle.');
+            return false;
+        }
+
+        // Validate received payment doesn't exceed total
+        if ($this->received_payment > $this->totalAmount) {
+            $this->addError('received_payment', 'Received payment cannot exceed total amount.');
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Create booking record
+     */
+    private function createBooking()
+    {
+        // Format phone numbers
+        $guestPhone = $this->formatPhoneNumber($this->guest_phone);
+        $guestWhatsapp = $this->guest_whatsapp
+            ? $this->formatPhoneNumber($this->guest_whatsapp)
+            : $guestPhone;
+
+        return Bookings::create([
+            'guest_name' => trim($this->guest_name),
+            'guest_phone' => $guestPhone,
+            'guest_whatsapp' => $guestWhatsapp,
+            'payment_type' => $this->payment_type,
+            'pickup_location_id' => $this->pickup_location_id,
+            'pickup_location_name' => $this->pickup_location_name,
+            'pickup_hotel_name' => $this->pickup_hotel_name ?: null,
+            'dropoff_location_id' => $this->dropoff_location_id,
+            'dropoff_location_name' => $this->dropoff_location_name,
+            'dropoff_hotel_name' => $this->dropoff_hotel_name ?: null,
+            'vehicle_id' => $this->vehicle_id,
+            'vehicle_name' => $this->vehicle_name,
+            'no_of_children' => $this->no_of_children,
+            'no_of_infants' => $this->no_of_infants,
+            'no_of_adults' => $this->no_of_adults,
+            'total_passengers' => $this->total_passengers,
+            'pickup_date' => $this->pickup_date,
+            'pickup_time' => $this->pickup_time,
+            'airline_name' => $this->airline_name ?: null,
+            'flight_number' => $this->flight_number ?: null,
+            'flight_details' => $this->flight_details ?: null,
+            'arrival_departure_date' => $this->arrival_departure_date ?: null,
+            'arrival_departure_time' => $this->arrival_departure_time ?: null,
+            'extra_information' => $this->extra_information ?: null,
+            'booking_status' => $this->booking_status,
+            'price' => $this->price,
+            'total_amount' => $this->totalAmount,
+            'discount_amount' => $this->discountAmount ?: 0,
+            'received_payment' => $this->received_payment ?: 0,
+            'created_by' => auth()->id(),
+        ]);
+    }
+
+    /**
+     * Attach additional services to booking
+     */
+    private function attachAdditionalServices($booking)
+    {
+        if (empty($this->selectedServices)) {
+            return;
+        }
+
+        $servicesData = [];
+        
+        foreach ($this->selectedServices as $serviceId) {
+            $service = $this->additionalServicesList->firstWhere('id', $serviceId);
+            if ($service) {
+                $amount = $this->calculateServiceCharge($service, $this->price);
+                $servicesData[$serviceId] = ['amount' => $amount];
+            }
+        }
+
+        if (!empty($servicesData)) {
+            $booking->additionalServices()->attach($servicesData);
         }
     }
 
@@ -429,11 +627,10 @@ class BookingCreate extends Component
 
     /**
      * Render component
-     * IMPORTANT: Pass all data as regular variables, not computed properties
      */
     public function render()
     {
-        // Get active route fares
+        // Get active route fares with relationships
         $routeFares = RouteFares::where('status', 'active')
             ->where(function ($query) {
                 $query->whereNull('start_date')
@@ -451,7 +648,7 @@ class BookingCreate extends Component
         $dropoffLocationIds = $routeFares->pluck('dropoff_id')->unique();
         $vehicleIds = $routeFares->pluck('vehicle_id')->unique();
 
-        // Get filtered data
+        // Get filtered data based on available routes
         $pickupLocations = PickUpLocation::whereIn('id', $pickupLocationIds)
             ->where('status', 'active')
             ->orderBy('pickup_location')

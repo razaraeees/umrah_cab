@@ -140,6 +140,7 @@ body:has(.custom-modal-wrapper) {
 
 
 
+
 @media (min-width: 576px) {
     .custom-modal-dialog {
         width: 90%;
