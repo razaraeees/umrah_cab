@@ -155,7 +155,104 @@
             @endif
         });
     </script>
+    <script>
+        // Simple function to handle copy
+        function copyBookingText(bookingId, type, button) {
+            const originalText = button.innerHTML;
 
+            // Call Livewire method
+            Livewire.dispatch('copy-booking', {
+                bookingId: bookingId,
+                type: type
+            });
+
+            // Give visual feedback
+            button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Copying...';
+            button.disabled = true;
+        }
+
+        // Listen for Livewire events
+        document.addEventListener('livewire:init', () => {
+            Livewire.on('copy-booking', async (data) => {
+                try {
+                    // Get the data - handle both array and object
+                    const params = Array.isArray(data) ? data[0] : data;
+
+                    // Call Livewire component to prepare text
+                    await Livewire.find(
+                        document.querySelector('[wire\\:id]').getAttribute('wire:id')
+                    ).call('prepareCopyText', params.bookingId, params.type);
+
+                } catch (err) {
+                    console.error('Error:', err);
+                }
+            });
+
+            Livewire.on('do-copy-now', async () => {
+                try {
+                    // Get text from backend
+                    const response = await fetch('{{ route('get-clipboard-text') }}');
+                    const data = await response.json();
+
+                    if (data.text) {
+                        // Try clipboard API first
+                        if (navigator.clipboard && window.isSecureContext) {
+                            await navigator.clipboard.writeText(data.text);
+                        } else {
+                            // Fallback for non-HTTPS
+                            const textArea = document.createElement('textarea');
+                            textArea.value = data.text;
+                            textArea.style.position = 'fixed';
+                            textArea.style.left = '-999999px';
+                            document.body.appendChild(textArea);
+                            textArea.select();
+                            document.execCommand('copy');
+                            document.body.removeChild(textArea);
+                        }
+
+                        // Success message
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Copied!',
+                            text: 'Text copied to clipboard',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+
+                        // Re-enable buttons
+                        document.querySelectorAll('.dropdown-item[disabled]').forEach(btn => {
+                            btn.disabled = false;
+                            btn.innerHTML = btn.innerHTML.replace(
+                                '<i class="fas fa-spinner fa-spin me-2"></i>Copying...',
+                                btn.textContent.includes('Driver') ?
+                                '<i class="fas fa-car me-2"></i>Copy for Driver' :
+                                '<i class="fas fa-user me-2"></i>Copy for Customer'
+                            );
+                        });
+                    }
+                } catch (err) {
+                    console.error('Copy failed:', err);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Failed!',
+                        text: 'Could not copy text',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            });
+
+            Livewire.on('copy-error', () => {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Failed to prepare text',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            });
+        });
+    </script>
 
     @livewireScripts
 

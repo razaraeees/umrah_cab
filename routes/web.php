@@ -68,7 +68,14 @@ Route::prefix('admin')->middleware(['auth', 'verified'])->group(function () {
     Route::controller(AdditionalController::class)->group(function () {
         Route::get('additional', 'index')->name('additional.index');
     });
+    Route::get('/get-clipboard-text', function () {
+        $text = cache()->get('clipboard_' . auth()->id(), '');
+        return response()->json([
+            'text' => $text
+        ]);
+    })->name('get-clipboard-text');
 });
+
 
 
 require __DIR__ . '/auth.php';

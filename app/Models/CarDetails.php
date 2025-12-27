@@ -22,4 +22,14 @@ class CarDetails extends Model
     protected $casts = [
         'air_condition' => 'boolean',
     ];
+
+    public function driver()
+    {
+        return $this->hasMany(Driver::class, 'car_id');
+    }
+
+    public function assignedDriver()
+    {
+        return $this->hasOne(Driver::class, 'car_id');
+    }
 }
