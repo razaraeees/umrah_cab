@@ -131,8 +131,8 @@
                                                 <td>{{ number_format($booking->price ?? 0, 2) }} SAR</td>
                                                 <td>
                                                     <span
-                                                        class="badge {{ $booking->booking_status == 'confirmed' ? 'bg-success' : ($booking->booking_status == 'pending' ? 'bg-warning' : 'bg-danger') }}">
-                                                        {{ ucfirst($booking->booking_status ?? 'pending') }}
+                                                        class="badge bg-secondary">
+                                                        {{ ucfirst($booking->booking_status ?? 'N/A') }}
                                                     </span>
                                                 </td>
                                                 <td>

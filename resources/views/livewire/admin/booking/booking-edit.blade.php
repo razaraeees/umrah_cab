@@ -507,9 +507,10 @@
                                             <select class="form-select @error('booking_status') is-invalid @enderror"
                                                 id="booking_status" wire:model.blur="booking_status">
                                                 <option value="pending" {{ $booking_status == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                <option value="confirmed" {{ $booking_status == 'confirmed' ? 'selected' : '' }}>Confirmed</option>
+                                                <option value="pickup" {{ $booking_status == 'pickup' ? 'selected' : '' }}>Pickup</option>
+                                                <option value="dropoff" {{ $booking_status == 'dropoff' ? 'selected' : '' }}>Drop-off</option>
+                                                <option value="hold" {{ $booking_status == 'hold' ? 'selected' : '' }}>Hold</option>
                                                 <option value="cancelled" {{ $booking_status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                                <option value="completed" {{ $booking_status == 'completed' ? 'selected' : '' }}>Completed</option>
                                             </select>
                                             @error('booking_status')
                                                 <span class="text-danger">{{ $message }}</span>

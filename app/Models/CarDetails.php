@@ -23,10 +23,7 @@ class CarDetails extends Model
         'air_condition' => 'boolean',
     ];
 
-    public function driver()
-    {
-        return $this->hasMany(Driver::class, 'car_id');
-    }
+    
 
     public function assignedDriver()
     {

@@ -10,7 +10,7 @@
 
                     <li>
                         <a href="{{ route('dashboard') }}" class="waves-effect">
-                            <i class="ri-dashboard-line"></i><span class="badge rounded-pill bg-success float-end">3</span>
+                            <i class="ri-dashboard-line"></i>
                             <span>Dashboard</span>
                         </a>
                     </li>
@@ -39,6 +39,15 @@
                         <ul class="sub-menu" aria-expanded="false">
                             <li><a href="{{ route('driver-detail.index') }}">Drivers</a></li>
                             <li><a href="{{ route('car-detail.index') }}">Cars Details</a></li>
+                        </ul>
+                    </li>
+                    <li>
+                        <a href="javascript: void(0);" class="has-arrow waves-effect">
+                            <i class="ri-wallet-fill"></i>
+                            <span>Driver Accounts</span>
+                        </a>
+                        <ul class="sub-menu" aria-expanded="false">
+                            <li><a href="{{ route('driver-account.index') }}">Drivers Manage</a></li>
                         </ul>
                     </li>
                     <!-- end li -->

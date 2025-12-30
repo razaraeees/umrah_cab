@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AccountController;
 use App\Http\Controllers\Admin\AdditionalController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\CarController;
@@ -74,6 +75,12 @@ Route::prefix('admin')->middleware(['auth', 'verified'])->group(function () {
             'text' => $text
         ]);
     })->name('get-clipboard-text');
+
+    
+    Route::controller(AccountController::class)->group(function () {
+        Route::get('driver-account', 'index')->name('driver-account.index');
+        Route::get('driver-account/{id}/details', 'driverDetails')->name('driver-account.details');
+    });
 });
 
 

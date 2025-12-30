@@ -97,7 +97,7 @@ class BookingCreate extends Component
     public $flight_details = '';
 
     // Additional Information
-    #[Validate('required|in:pending,confirmed,cancelled,completed')]
+    #[Validate('required|in:pending,pickup,dropoff,hold,cancelled')]
     public $booking_status = 'pending';
 
     #[Validate('nullable|numeric|min:0')]

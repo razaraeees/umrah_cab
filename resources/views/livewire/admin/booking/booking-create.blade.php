@@ -535,7 +535,9 @@
                                             <select class="form-select @error('booking_status') is-invalid @enderror"
                                                 id="booking_status" wire:model.blur="booking_status">
                                                 <option value="pending">Pending</option>
-                                                <option value="confirmed">Confirmed</option>
+                                                <option value="pickup">Pickup</option>
+                                                <option value="dropoff">Drop-off</option>
+                                                <option value="hold">Hold</option>
                                                 <option value="cancelled">Cancelled</option>
                                             </select>
                                             @error('booking_status')

@@ -41,7 +41,7 @@ return new class extends Migration
             $table->time('arrival_departure_time')->nullable();
 
             $table->text('extra_information')->nullable();
-            $table->enum('booking_status', ['pending', 'confirmed', 'cancelled', 'completed'])->default('pending');
+            $table->enum('booking_status', ['pending', 'pickup', 'dropoff', 'hold', 'cancelled'])->default('pending');
             // Pricing (optional)
             $table->decimal('price', 10, 2)->nullable();
             $table->decimal('recived_paymnet', 10, 2)->nullable();

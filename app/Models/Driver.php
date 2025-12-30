@@ -24,4 +24,9 @@ class Driver extends Model
     {
         return $this->belongsTo(CarDetails::class, 'car_id');
     }
+
+    public function bookings()
+    {
+        return $this->hasManyThrough(Bookings::class, CarDetails::class, 'id', 'vehicle_id', 'car_id', 'id');
+    }
 }
