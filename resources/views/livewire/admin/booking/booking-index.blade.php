@@ -17,9 +17,6 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="row align-items-center">
-                                {{-- <div class="col-auto">
-                                    <label class="form-label mb-0">Date Range:</label>
-                                </div> --}}
                                 <div class="col-auto">
                                     <input type="date" class="form-control" wire:model.blur="startDate"
                                         placeholder="Start Date">
@@ -61,6 +58,7 @@
                                         <option value="yesterday">Yesterday</option>
                                     </select>
                                 </div>
+                               
                                 <div class="col">
                                     <div class="input-group" style="max-width: 250px;">
                                         <input type="text" class="form-control" placeholder="Search..."
@@ -70,6 +68,11 @@
                                             <span class="spinner-border spinner-border-sm text-primary"></span>
                                         </span>
                                     </div>
+                                </div>
+                                 <div class="col-auto">
+                                    <a href="{{ route('booking.print') }}?search={{ urlencode($search) }}&dateFilter={{ urlencode($dateFilter) }}&startDate={{ urlencode($startDate) }}&endDate={{ urlencode($endDate) }}" target="_blank" class="btn btn-info">
+                                        <i class="fas fa-print me-2"></i>Print Bookings
+                                    </a>
                                 </div>
                                 <div class="col-auto">
                                     <a href="{{ route('booking.create') }}" class="btn btn-primary">
@@ -91,6 +94,7 @@
                                             <th style="font-weight: 600; color: #000;">Pickup Time</th>
                                             <th style="font-weight: 600; color: #000;">Passengers</th>
                                             <th style="font-weight: 600; color: #000;">Price</th>
+                                            <th style="font-weight: 600; color: #000;">Total Amount</th>
                                             <th style="font-weight: 600; color: #000;">Status</th>
                                             <th style="font-weight: 600; color: #000;">Actions</th>
                                         </tr>
@@ -129,9 +133,9 @@
                                                     </div>
                                                 </td>
                                                 <td>{{ number_format($booking->price ?? 0, 2) }} SAR</td>
+                                                <td>{{ number_format($booking->total_amount ?? 0, 2) }} SAR</td>
                                                 <td>
-                                                    <span
-                                                        class="badge bg-secondary">
+                                                    <span class="badge bg-secondary">
                                                         {{ ucfirst($booking->booking_status ?? 'N/A') }}
                                                     </span>
                                                 </td>
@@ -179,6 +183,24 @@
                                                                 <hr class="dropdown-divider">
                                                             </li>
 
+                                                            <!-- Customer Invoice -->
+                                                            <li>
+                                                                <button type="button"
+                                                                    class="dropdown-item text-info"
+                                                                    wire:click="generateInvoicePDF({{ $booking->id }}, 'customer')">
+                                                                    <i class="fas fa-file-invoice me-2"></i>Customer Invoice
+                                                                </button>
+                                                            </li>
+
+                                                            <!-- Driver Invoice -->
+                                                            <li>
+                                                                <button type="button"
+                                                                    class="dropdown-item text-warning"
+                                                                    wire:click="generateInvoicePDF({{ $booking->id }}, 'driver')">
+                                                                    <i class="fas fa-file-invoice me-2"></i>Driver Invoice
+                                                                </button>
+                                                            </li>
+
                                                             <!-- Copy Driver -->
                                                             <li>
                                                                 <button type="button"
@@ -222,4 +244,5 @@
 
         </div>
     </div>
+    
 </div>

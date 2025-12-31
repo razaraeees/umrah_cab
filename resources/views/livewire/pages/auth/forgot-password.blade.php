@@ -64,26 +64,5 @@ $sendPasswordResetLink = function () {
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-12">
-                <div class="text-center plan-line">
-                    or sign up with
-                </div>
-            </div>
-        </div>
-
-        <div class="row mt-3">
-            <div class="button-list btn-social-icon text-center">
-                <button type="button" class="btn btn-facebook">
-                    <i class="fab fa-facebook"></i>
-                </button>
-                <button type="button" class="btn btn-twitter ms-1">
-                    <i class="fab fa-twitter"></i>
-                </button>
-                <button type="button" class="btn btn-linkedin ms-1">
-                    <i class="fab fa-linkedin"></i>
-                </button>
-            </div>
-        </div>
     </form>
 </div>

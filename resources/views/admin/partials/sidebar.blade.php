@@ -15,22 +15,22 @@
                         </a>
                     </li>
 
-                    <li>
-                        <a href="javascript: void(0);" class="has-arrow waves-effect">
-                            <i class="ri-store-2-line"></i>
-                            <span>Booking Manage</span>
-                        </a>
-                        <ul class="sub-menu" aria-expanded="false">
-                            <li><a href="{{ route('pickup.index') }}">Pick Up</a></li>
-                            <li><a href="{{ route('drop-off.index') }}">Drop Off</a></li>
-                            <li><a href="{{ route('routefares.index') }}">Routes And Fares</a></li>
-                            <li><a href="{{ route('cities.index') }}">Cities</a></li>
-                            <li><a href="{{ route('hotel.index') }}">Hotels</a></li>
-                            <li><a href="{{ route('booking.index') }}">Bookings</a></li>
-                            <li><a href="{{ route('additional.index') }}">Additional Service</a></li>
+                    <li class="mm-active">
+                    <a href="javascript: void(0);" class="has-arrow waves-effect" aria-expanded="true">
+                        <i class="ri-store-2-line"></i>
+                        <span>Booking Manage</span>
+                    </a>
+                    <ul class="sub-menu mm-show" aria-expanded="true">
+                        <li><a href="{{ route('pickup.index') }}">Pick Up</a></li>
+                        <li><a href="{{ route('drop-off.index') }}">Drop Off</a></li>
+                        <li><a href="{{ route('routefares.index') }}">Routes And Fares</a></li>
+                        <li><a href="{{ route('cities.index') }}">Cities</a></li>
+                        <li><a href="{{ route('hotel.index') }}">Hotels</a></li>
+                        <li><a href="{{ route('booking.index') }}">Bookings</a></li>
+                        <li><a href="{{ route('additional.index') }}">Additional Service</a></li>
+                    </ul>
+                </li>
 
-                        </ul>
-                    </li>
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="ri-car-line"></i>
@@ -51,12 +51,12 @@
                         </ul>
                     </li>
                     <!-- end li -->
-                    <li>
+                    {{-- <li>
                         <a href="apps-kanban-board.html" class=" waves-effect">
                             <i class="ri-artboard-2-line"></i>
                             <span>Kanban Board</span>
                         </a>
-                    </li>
+                    </li> --}}
                     <!-- end li -->
                     <li class="menu-title">Pages</li>
 

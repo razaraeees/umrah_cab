@@ -134,6 +134,26 @@
                 </div>
             </div>
 
+            <!-- Pending Bookings -->
+            <div class="row mt-4">
+                <div class="col-xl-3 col-md-6">
+                    <div class="card">
+                        <div class="card-body" style="min-height: 120px;">
+                            <div class="d-flex">
+                                <div class="flex-1">
+                                    <h4 class="mb-1">{{ $pendingBookings }}</h4>
+                                    <h6 class="text-muted font-size-14 mb-0">Pending Bookings</h6>
+                                </div>
+                                <div class="ms-3">
+                                    <div class="avatar-sm bg-soft-warning rounded">
+                                        <i class="fas fa-clock text-warning font-size-20"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             <!-- Revenue Statistics -->
             <div class="row mt-4">
                 <!-- Total Revenue -->

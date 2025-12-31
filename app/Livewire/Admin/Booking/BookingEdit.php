@@ -606,12 +606,12 @@ class BookingEdit extends Component
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // Log::error('Booking update failed', [
-            //     'booking_id' => $this->bookingId,
-            //     'error' => $e->getMessage(),
-            //     'trace' => $e->getTraceAsString(),
-            //     'data' => $this->all()
-            // ]);
+            Log::error('Booking update failed', [
+                'booking_id' => $this->bookingId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'data' => $this->all()
+            ]);
 
             $this->dispatch('show-toast', type: 'error', message: 'Failed to update booking. Please try again.');
             // session()->flash('error', 'Failed to update booking. Please try again.');

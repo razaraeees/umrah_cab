@@ -285,67 +285,6 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-12">
-                                        <div class="mb-3">
-                                            <label class="form-label fw-bold">Additional Services</label>
-                                            <div class="row g-3">
-                                                @foreach($additionalServicesList as $service)
-                                                    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                                                        <div class="form-check card-radio">
-                                                            <input class="form-check-input" type="checkbox" 
-                                                                   id="service_{{ $service->id }}" 
-                                                                   wire:model.live="selectedServices" 
-                                                                   value="{{ $service->id }}">
-                                                            <label class="form-check-label" for="service_{{ $service->id }}">
-                                                                <span class="fs-14 text-wrap">{{ $service->services }}</span>
-                                                                <span class="text-muted d-block small">
-                                                                    @if($service->charges_type == 'percentage')
-                                                                        {{ $service->charge_value }}%
-                                                                        <span x-show="$wire.price">
-                                                                            (<span x-text="({{ $service->charge_value }} * $wire.price / 100).toFixed(2)"></span> SAR)
-                                                                        </span>
-                                                                    @else
-                                                                        {{ number_format($service->charge_value, 2) }} SAR
-                                                                    @endif
-                                                                </span>
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="discount_amount" class="form-label">Discount Amount (SAR)</label>
-                                            <input type="number" step="0.01" min="0"
-                                                class="form-control @error('discountAmount') is-invalid @enderror"
-                                                id="discount_amount" wire:model.live="discountAmount"
-                                                placeholder="Enter discount amount"
-                                                :max="$wire.totalAmount"
-                                                @input="validateDiscount()">
-                                            @error('discountAmount')
-                                                <span class="text-danger">{{ $message }}</span>
-                                            @enderror
-                                            <small class="text-muted" x-show="$wire.discountAmount > $wire.totalAmount" class="text-danger">
-                                                Discount cannot exceed total amount
-                                            </small>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-12">
-                                        <div class="alert alert-info d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <h5 class="mb-0">Total Amount:</h5>
-                                                <small class="text-muted">Base Price + Additional Services - Discount</small>
-                                            </div>
-                                            <h3 class="mb-0 text-primary">
-                                                {{ number_format($totalAmount, 2) }} 
-                                                <small class="fs-6 text-muted">SAR</small>
-                                            </h3>
-                                        </div>
-                                    </div>
                                 </div>
                                 
                                 <hr>
@@ -575,6 +514,67 @@
                                             @error('extra_information')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Additional Services</label>
+                                            <div class="row g-3">
+                                                @foreach($additionalServicesList as $service)
+                                                    <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                                                        <div class="form-check card-radio">
+                                                            <input class="form-check-input" type="checkbox" 
+                                                                   id="service_{{ $service->id }}" 
+                                                                   wire:model.live="selectedServices" 
+                                                                   value="{{ $service->id }}">
+                                                            <label class="form-check-label" for="service_{{ $service->id }}">
+                                                                <span class="fs-14 text-wrap">{{ $service->services }}</span>
+                                                                <span class="text-muted d-block small">
+                                                                    @if($service->charges_type == 'percentage')
+                                                                        {{ $service->charge_value }}%
+                                                                        <span x-show="$wire.price">
+                                                                            (<span x-text="({{ $service->charge_value }} * $wire.price / 100).toFixed(2)"></span> SAR)
+                                                                        </span>
+                                                                    @else
+                                                                        {{ number_format($service->charge_value, 2) }} SAR
+                                                                    @endif
+                                                                </span>
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="discount_amount" class="form-label">Discount Amount (SAR)</label>
+                                            <input type="number" step="0.01" min="0"
+                                                class="form-control @error('discountAmount') is-invalid @enderror"
+                                                id="discount_amount" wire:model.live="discountAmount"
+                                                placeholder="Enter discount amount"
+                                                :max="$wire.totalAmount"
+                                                @input="validateDiscount()">
+                                            @error('discountAmount')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                            <small class="text-muted" x-show="$wire.discountAmount > $wire.totalAmount" class="text-danger">
+                                                Discount cannot exceed total amount
+                                            </small>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-12">
+                                        <div class="alert alert-info d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <h5 class="mb-0">Total Amount:</h5>
+                                                <small class="text-muted">Base Price + Additional Services - Discount</small>
+                                            </div>
+                                            <h3 class="mb-0 text-primary">
+                                                {{ number_format($totalAmount, 2) }} 
+                                                <small class="fs-6 text-muted">SAR</small>
+                                            </h3>
                                         </div>
                                     </div>
                                 </div>

@@ -12,7 +12,7 @@
         <!-- Icons Css -->
         <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
         <!-- App Css-->
-        <link href="{{ asset('assets/css/app.min.css') }}" id="app-style" rel="stylesheet" type="text/css" />
+        <link href="{{ asset('assets/css/app.css') }}" id="app-style" rel="stylesheet" type="text/css" />
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -31,11 +31,11 @@
                     <div class="col-md-8 col-lg-6 col-xl-5">
                         <div class="card">
                             <div class="card-body">
-                                <div class="text-center mt-4">
-                                    <div class="mb-3">
-                                        <a href="/" wire:navigate>
-                                            <img src="{{ asset('assets/images/logo-dark.png') }}" alt="" height="22" class="auth-logo logo-dark mx-auto">
-                                            <img src="{{ asset('assets/images/logo-light.png') }}" alt="" height="22" class="auth-logo logo-light mx-auto">
+                                <div class="text-center justify-content-center mt-4">
+                                    <div class="mb-1">
+                                        <a href="/" wire:navigate class="d-flex justify-content-center align-items-center">
+                                            <img src="{{ asset('assets/images/umrah_cap_auth.png') }}" alt=""  class="auth-logo logo-dark text-center">
+                                            <img src="{{ asset('assets/images/umrah_cap_auth.png') }}" alt=""  class="auth-logo logo-light text-center">
                                         </a>
                                     </div>
                                 </div>

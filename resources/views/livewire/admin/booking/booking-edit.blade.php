@@ -88,8 +88,7 @@
                                         <div class="mb-3">
                                             <label for="payment_type" class="form-label">Payment Type <span
                                                     class="text-danger">*</span></label>
-                                            <select
-                                                class="form-select @error('payment_type') is-invalid @enderror"
+                                            <select class="form-select @error('payment_type') is-invalid @enderror"
                                                 id="payment_type" wire:model.live="payment_type">
                                                 <option value="credit">Credit</option>
                                                 <option value="cash">Cash</option>
@@ -138,7 +137,8 @@
                                                 @change="filterPickupHotels($event)">
                                                 <option value="">Select City</option>
                                                 @foreach ($cities as $city)
-                                                    <option value="{{ $city->id }}" {{ $city->id == $pickup_city_id ? 'selected' : '' }}>
+                                                    <option value="{{ $city->id }}"
+                                                        {{ $city->id == $pickup_city_id ? 'selected' : '' }}>
                                                         {{ $city->name }}
                                                     </option>
                                                 @endforeach
@@ -151,16 +151,19 @@
 
                                     <div class="col-md-6" x-show="showPickupHotel">
                                         <div class="mb-3">
-                                            <label for="pickup_hotel_name" class="form-label">Pickup Hotel Name</label>
-                                            <select class="form-select @error('pickup_hotel_name') is-invalid @enderror"
+                                            <label for="pickup_hotel_name" class="form-label">Pickup Hotel
+                                                Name</label>
+                                            <select
+                                                class="form-select @error('pickup_hotel_name') is-invalid @enderror"
                                                 id="pickup_hotel_name" wire:model.blur="pickup_hotel_name">
                                                 <option value="">Select Hotel</option>
                                                 <template x-for="hotel in filteredPickupHotels" :key="hotel.id">
-                                                    <option :value="hotel.name" x-text="hotel.name" 
+                                                    <option :value="hotel.name" x-text="hotel.name"
                                                         :selected="hotel.name == '{{ $pickup_hotel_name }}'"></option>
                                                 </template>
                                             </select>
-                                            <small class="text-muted">Select city first, then hotel will be available</small>
+                                            <small class="text-muted">Select city first, then hotel will be
+                                                available</small>
                                             @error('pickup_hotel_name')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
@@ -198,7 +201,9 @@
                                                 @change="filterDropoffHotels($event)">
                                                 <option value="">Select City</option>
                                                 @foreach ($cities as $city)
-                                                    <option value="{{ $city->id }}" {{ $city->id == $dropoff_city_id ? 'selected' : '' }}>{{ $city->name }}</option>
+                                                    <option value="{{ $city->id }}"
+                                                        {{ $city->id == $dropoff_city_id ? 'selected' : '' }}>
+                                                        {{ $city->name }}</option>
                                                 @endforeach
                                             </select>
                                             @error('dropoff_city_id')
@@ -209,17 +214,20 @@
 
                                     <div class="col-md-6" x-show="showDropoffHotel">
                                         <div class="mb-3">
-                                            <label for="dropoff_hotel_name" class="form-label">Dropoff Hotel Name</label>
+                                            <label for="dropoff_hotel_name" class="form-label">Dropoff Hotel
+                                                Name</label>
                                             <select
                                                 class="form-select @error('dropoff_hotel_name') is-invalid @enderror"
                                                 id="dropoff_hotel_name" wire:model.blur="dropoff_hotel_name">
                                                 <option value="">Select Hotel</option>
-                                                <template x-for="hotel in filteredDropoffHotels" :key="hotel.id">
-                                                    <option :value="hotel.name" x-text="hotel.name" 
+                                                <template x-for="hotel in filteredDropoffHotels"
+                                                    :key="hotel.id">
+                                                    <option :value="hotel.name" x-text="hotel.name"
                                                         :selected="hotel.name == '{{ $dropoff_hotel_name }}'"></option>
                                                 </template>
                                             </select>
-                                            <small class="text-muted">Select city first, then hotel will be available</small>
+                                            <small class="text-muted">Select city first, then hotel will be
+                                                available</small>
                                             @error('dropoff_hotel_name')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
@@ -250,10 +258,12 @@
                                                     </option>
                                                 </template>
                                             </select>
-                                            <small class="text-muted" x-show="filteredVehicles.length === 0" style="color: red !important;">
+                                            <small class="text-muted" x-show="filteredVehicles.length === 0"
+                                                style="color: red !important;">
                                                 No vehicles available for this route
                                             </small>
-                                            <small class="text-muted" x-show="filteredVehicles.length > 0" x-text="`${filteredVehicles.length} vehicle(s) available`"></small>
+                                            <small class="text-muted" x-show="filteredVehicles.length > 0"
+                                                x-text="`${filteredVehicles.length} vehicle(s) available`"></small>
                                             @error('vehicle_id')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
@@ -275,65 +285,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-12 mt-3 mb-3">
-                                        <label class="form-label fw-bold">Additional Services</label>
-                                        <div class="row g-2">
-                                            @foreach($additionalServicesList as $service)
-                                            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
-                                                <div class="form-check card-radio">
-                                                    <input class="form-check-input" type="checkbox" 
-                                                        value="{{ $service->id }}" 
-                                                        id="service_{{ $service->id }}" 
-                                                        wire:model.live="selectedServices">
-                                                    <label class="form-check-label" for="service_{{ $service->id }}">
-                                                        <span class="fs-14 text-wrap">{{ $service->services }}</span>
-                                                        <span class="text-muted d-block small">
-                                                            @if($service->charges_type == 'percentage')
-                                                                {{ $service->charge_value }}%
-                                                                <span x-show="$wire.price">
-                                                                    (<span x-text="({{ $service->charge_value }} * $wire.price / 100).toFixed(2)"></span> SAR)
-                                                                </span>
-                                                            @else
-                                                                {{ number_format($service->charge_value, 2) }} SAR
-                                                            @endif
-                                                        </span>
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
 
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="discount_amount" class="form-label">Discount Amount (SAR)</label>
-                                            <input type="number" step="0.01" min="0"
-                                                class="form-control @error('discountAmount') is-invalid @enderror"
-                                                id="discount_amount" wire:model.live="discountAmount"
-                                                placeholder="Enter discount amount"
-                                                :max="$wire.totalAmount"
-                                                @input="validateDiscount()">
-                                            @error('discountAmount')
-                                                <span class="text-danger">{{ $message }}</span>
-                                            @enderror
-                                            <small class="text-muted" x-show="$wire.discountAmount > $wire.totalAmount" class="text-danger">
-                                                Discount cannot exceed total amount
-                                            </small>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="col-12">
-                                        <div class="alert alert-info d-flex justify-content-between align-items-center">
-                                            <div>
-                                                <strong>Total Amount:</strong>
-                                                <small class="text-muted">Base Price + Additional Services - Discount</small>
-                                            </div>
-                                            <h3 class="mb-0 text-primary">
-                                                {{ number_format($totalAmount, 2) }} 
-                                                <small class="fs-6 text-muted">SAR</small>
-                                            </h3>
-                                        </div>
-                                    </div>
                                 </div>
 
                                 <!-- Passenger Information -->
@@ -506,11 +458,19 @@
                                                     class="text-danger">*</span></label>
                                             <select class="form-select @error('booking_status') is-invalid @enderror"
                                                 id="booking_status" wire:model.blur="booking_status">
-                                                <option value="pending" {{ $booking_status == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                <option value="pickup" {{ $booking_status == 'pickup' ? 'selected' : '' }}>Pickup</option>
-                                                <option value="dropoff" {{ $booking_status == 'dropoff' ? 'selected' : '' }}>Drop-off</option>
-                                                <option value="hold" {{ $booking_status == 'hold' ? 'selected' : '' }}>Hold</option>
-                                                <option value="cancelled" {{ $booking_status == 'cancelled' ? 'selected' : '' }}>Cancelled</option>
+                                                <option value="pending"
+                                                    {{ $booking_status == 'pending' ? 'selected' : '' }}>Pending
+                                                </option>
+                                                <option value="pickup"
+                                                    {{ $booking_status == 'pickup' ? 'selected' : '' }}>Pickup</option>
+                                                <option value="dropoff"
+                                                    {{ $booking_status == 'dropoff' ? 'selected' : '' }}>Drop-off
+                                                </option>
+                                                <option value="hold"
+                                                    {{ $booking_status == 'hold' ? 'selected' : '' }}>Hold</option>
+                                                <option value="cancelled"
+                                                    {{ $booking_status == 'cancelled' ? 'selected' : '' }}>Cancelled
+                                                </option>
                                             </select>
                                             @error('booking_status')
                                                 <span class="text-danger">{{ $message }}</span>
@@ -520,15 +480,17 @@
 
                                     <div class="col-md-6">
                                         <div class="mb-3">
-                                            <label for="received_payment" class="form-label">Received Payment (SAR)</label>
+                                            <label for="received_payment" class="form-label">Received Payment
+                                                (SAR)</label>
                                             <input type="number" step="0.01" min="0"
                                                 class="form-control @error('received_payment') is-invalid @enderror"
                                                 id="received_payment" wire:model.blur="received_payment"
-                                                placeholder="Enter received payment"
-                                                :max="$wire.totalAmount">
+                                                placeholder="Enter received payment" :max="$wire.totalAmount">
                                             <small class="text-muted">
                                                 <span x-show="$wire.received_payment > 0">
-                                                    Remaining: <span x-text="($wire.totalAmount - $wire.received_payment).toFixed(2)"></span> SAR
+                                                    Remaining: <span
+                                                        x-text="($wire.totalAmount - $wire.received_payment).toFixed(2)"></span>
+                                                    SAR
                                                 </span>
                                             </small>
                                             @error('received_payment')
@@ -546,6 +508,72 @@
                                             @error('extra_information')
                                                 <span class="text-danger">{{ $message }}</span>
                                             @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-12 mt-3 mb-3">
+                                        <label class="form-label fw-bold">Additional Services</label>
+                                        <div class="row g-2">
+                                            @foreach ($additionalServicesList as $service)
+                                                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                                                    <div class="form-check card-radio">
+                                                        <input class="form-check-input" type="checkbox"
+                                                            value="{{ $service->id }}"
+                                                            id="service_{{ $service->id }}"
+                                                            wire:model.live="selectedServices">
+                                                        <label class="form-check-label"
+                                                            for="service_{{ $service->id }}">
+                                                            <span
+                                                                class="fs-14 text-wrap">{{ $service->services }}</span>
+                                                            <span class="text-muted d-block small">
+                                                                @if ($service->charges_type == 'percentage')
+                                                                    {{ $service->charge_value }}%
+                                                                    <span x-show="$wire.price">
+                                                                        (<span
+                                                                            x-text="({{ $service->charge_value }} * $wire.price / 100).toFixed(2)"></span>
+                                                                        SAR)
+                                                                    </span>
+                                                                @else
+                                                                    {{ number_format($service->charge_value, 2) }} SAR
+                                                                @endif
+                                                            </span>
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="discount_amount" class="form-label">Discount Amount
+                                                (SAR)</label>
+                                            <input type="number" step="0.01" min="0"
+                                                class="form-control @error('discountAmount') is-invalid @enderror"
+                                                id="discount_amount" wire:model.live="discountAmount"
+                                                placeholder="Enter discount amount" :max="$wire.totalAmount"
+                                                @input="validateDiscount()">
+                                            @error('discountAmount')
+                                                <span class="text-danger">{{ $message }}</span>
+                                            @enderror
+                                            <small class="text-muted"
+                                                x-show="$wire.discountAmount > $wire.totalAmount" class="text-danger">
+                                                Discount cannot exceed total amount
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div
+                                            class="alert alert-info d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong>Total Amount:</strong>
+                                                <small class="text-muted">Base Price + Additional Services -
+                                                    Discount</small>
+                                            </div>
+                                            <h3 class="mb-0 text-primary">
+                                                {{ number_format($totalAmount, 2) }}
+                                                <small class="fs-6 text-muted">SAR</small>
+                                            </h3>
                                         </div>
                                     </div>
                                 </div>
@@ -573,314 +601,314 @@
 </div>
 
 <script>
-function bookingForm() {
-    return {
-        routeFares: @json($routeFares),
-        vehicles: @json($vehicles),
-        hotels: @json($hotels),
-        pickupLocations: @json($pickupLocations),
-        dropoffLocations: @json($dropoffLocations),
+    function bookingForm() {
+        return {
+            routeFares: @json($routeFares),
+            vehicles: @json($vehicles),
+            hotels: @json($hotels),
+            pickupLocations: @json($pickupLocations),
+            dropoffLocations: @json($dropoffLocations),
 
-        copyWhatsapp: false,
-        showPickupHotel: false,
-        showDropoffHotel: false,
-        showFlightSection: false,
-        pickupLocationType: '',
-        dropoffLocationType: '',
-        vehicleCapacity: 4,
+            copyWhatsapp: false,
+            showPickupHotel: false,
+            showDropoffHotel: false,
+            showFlightSection: false,
+            pickupLocationType: '',
+            dropoffLocationType: '',
+            vehicleCapacity: 4,
 
-        filteredPickupHotels: [],
-        filteredDropoffHotels: [],
-        filteredVehicles: [],
-        calculatedPrice: '',
+            filteredPickupHotels: [],
+            filteredDropoffHotels: [],
+            filteredVehicles: [],
+            calculatedPrice: '',
 
-        init() {
-            console.log('Alpine initialized');
-            this.filteredPickupHotels = this.hotels;
-            this.filteredDropoffHotels = this.hotels;
-            this.filteredVehicles = this.vehicles;
-            this.loadExistingData();
-            this.$watch('$wire.price', value => {
-                this.calculatePrice(); // Recalculate if base price changes
-            });
-        },
-
-        loadExistingData() {
-            this.pickupLocationType = '{{ $pickup_location_type }}' || '';
-            this.dropoffLocationType = '{{ $dropoff_location_type }}' || '';
-            this.showPickupHotel = (this.pickupLocationType === 'Hotel');
-            this.showDropoffHotel = (this.dropoffLocationType === 'Hotel');
-            this.showFlightSection = (this.pickupLocationType === 'Airport');
-            
-            // Set initial state based on Livewire data
-            this.calculatedPrice = '{{ $price }}' || '';
-
-            const phone = '{{ $guest_phone }}';
-            const whatsapp = '{{ $guest_whatsapp }}';
-            if (phone && whatsapp && phone === whatsapp) {
-                this.copyWhatsapp = true;
-            }
-
-            const currentVehicleId = parseInt('{{ $vehicle_id }}');
-            if (currentVehicleId) {
-                const vehicle = this.vehicles.find(v => v.id === currentVehicleId);
-                if (vehicle) this.vehicleCapacity = parseInt(vehicle.seating_capacity);
-            }
-
-            const pickupCityId = '{{ $pickup_city_id }}';
-            const dropoffCityId = '{{ $dropoff_city_id }}';
-            if (pickupCityId) this.filteredPickupHotels = this.hotels.filter(h => h.city_id == pickupCityId);
-            if (dropoffCityId) this.filteredDropoffHotels = this.hotels.filter(h => h.city_id == dropoffCityId);
-
-            this.filterVehiclesByRoute();
-            // Recalculate total on load
-            this.calculateTotal(); 
-        },
-
-        get totalPassengers() {
-            const adults = parseInt(this.$wire.no_of_adults) || 0;
-            const children = parseInt(this.$wire.no_of_children) || 0;
-            const infants = parseInt(this.$wire.no_of_infants) || 0;
-            return adults + children + infants;
-        },
-
-        copyToWhatsappIfChecked() {
-            if (this.copyWhatsapp) this.$wire.guest_whatsapp = this.$wire.guest_phone;
-        },
-
-        handlePickupChange(event) {
-            const option = event.target.selectedOptions[0];
-            const type = option?.dataset.type || '';
-            const name = option?.dataset.name || '';
-
-            this.pickupLocationType = type;
-            this.showPickupHotel = (type === 'Hotel');
-            this.showFlightSection = (type === 'Airport');
-
-            this.$wire.pickup_location_type = type;
-            this.$wire.pickup_location_name = name;
-
-            if (type !== 'Hotel') {
-                this.$wire.pickup_hotel_name = '';
-                this.$wire.pickup_city_id = '';
-            }
-
-            if (type !== 'Airport') {
-                this.$wire.airline_name = '';
-                this.$wire.flight_number = '';
-                this.$wire.arrival_departure_date = '';
-                this.$wire.arrival_departure_time = '';
-                this.$wire.flight_details = '';
-            }
-
-            this.filterVehiclesByRoute();
-            this.calculatePrice();
-        },
-
-        handleDropoffChange(event) {
-            const option = event.target.selectedOptions[0];
-            const type = option?.dataset.type || '';
-            const name = option?.dataset.name || '';
-
-            this.dropoffLocationType = type;
-            this.showDropoffHotel = (type === 'Hotel');
-
-            this.$wire.dropoff_location_type = type;
-            this.$wire.dropoff_location_name = name;
-
-            if (type !== 'Hotel') {
-                this.$wire.dropoff_hotel_name = '';
-                this.$wire.dropoff_city_id = '';
-            }
-
-            this.filterVehiclesByRoute();
-            this.calculatePrice();
-        },
-
-        handleVehicleChange(event) {
-            const option = event.target.selectedOptions[0];
-            const capacity = parseInt(option?.dataset.capacity) || 4;
-            const name = option?.dataset.name || '';
-
-            this.vehicleCapacity = capacity;
-            this.$wire.vehicle_name = name;
-            this.$wire.vehicle_id = option.value;
-
-            this.validateCapacity();
-            this.calculatePrice();
-        },
-
-        filterPickupHotels(event) {
-            const cityId = event.target.value;
-            this.filteredPickupHotels = cityId 
-                ? this.hotels.filter(h => h.city_id == cityId) 
-                : this.hotels;
-            
-            if (this.$wire.pickup_hotel_name) {
-                const hotelExists = this.filteredPickupHotels.some(h => h.name == this.$wire.pickup_hotel_name);
-                if (!hotelExists) this.$wire.pickup_hotel_name = '';
-            }
-            this.$wire.pickup_city_id = cityId;
-        },
-
-        filterDropoffHotels(event) {
-            const cityId = event.target.value;
-            this.filteredDropoffHotels = cityId 
-                ? this.hotels.filter(h => h.city_id == cityId) 
-                : this.hotels;
-            
-            if (this.$wire.dropoff_hotel_name) {
-                const hotelExists = this.filteredDropoffHotels.some(h => h.name == this.$wire.dropoff_hotel_name);
-                if (!hotelExists) this.$wire.dropoff_hotel_name = '';
-            }
-            this.$wire.dropoff_city_id = cityId;
-        },
-
-        filterVehiclesByRoute() {
-            const pickupId = this.$wire.pickup_location_id;
-            const dropoffId = this.$wire.dropoff_location_id;
-
-            if (!pickupId || !dropoffId) {
+            init() {
+                console.log('Alpine initialized');
+                this.filteredPickupHotels = this.hotels;
+                this.filteredDropoffHotels = this.hotels;
                 this.filteredVehicles = this.vehicles;
-                return;
-            }
+                this.loadExistingData();
+                this.$watch('$wire.price', value => {
+                    this.calculatePrice(); // Recalculate if base price changes
+                });
+            },
 
-            const validVehicles = new Set();
-            this.routeFares.forEach(fare => {
-                if (fare.pickup_id == pickupId && fare.dropoff_id == dropoffId) {
-                    validVehicles.add(fare.vehicle_id);
+            loadExistingData() {
+                this.pickupLocationType = '{{ $pickup_location_type }}' || '';
+                this.dropoffLocationType = '{{ $dropoff_location_type }}' || '';
+                this.showPickupHotel = (this.pickupLocationType === 'Hotel');
+                this.showDropoffHotel = (this.dropoffLocationType === 'Hotel');
+                this.showFlightSection = (this.pickupLocationType === 'Airport');
+
+                // Set initial state based on Livewire data
+                this.calculatedPrice = '{{ $price }}' || '';
+
+                const phone = '{{ $guest_phone }}';
+                const whatsapp = '{{ $guest_whatsapp }}';
+                if (phone && whatsapp && phone === whatsapp) {
+                    this.copyWhatsapp = true;
                 }
-            });
 
-            this.filteredVehicles = this.vehicles.filter(v => validVehicles.has(v.id));
+                const currentVehicleId = parseInt('{{ $vehicle_id }}');
+                if (currentVehicleId) {
+                    const vehicle = this.vehicles.find(v => v.id === currentVehicleId);
+                    if (vehicle) this.vehicleCapacity = parseInt(vehicle.seating_capacity);
+                }
 
-            const currentVehicleId = parseInt(this.$wire.vehicle_id);
-            if (currentVehicleId && !validVehicles.has(currentVehicleId)) {
-                this.$wire.vehicle_id = '';
-                this.$wire.vehicle_name = '';
-                this.calculatedPrice = '';
-                this.$wire.price = '';
-            }
+                const pickupCityId = '{{ $pickup_city_id }}';
+                const dropoffCityId = '{{ $dropoff_city_id }}';
+                if (pickupCityId) this.filteredPickupHotels = this.hotels.filter(h => h.city_id == pickupCityId);
+                if (dropoffCityId) this.filteredDropoffHotels = this.hotels.filter(h => h.city_id == dropoffCityId);
 
-            if (this.filteredVehicles.length === 1) {
-                const vehicle = this.filteredVehicles[0];
-                this.$wire.vehicle_id = vehicle.id;
-                this.vehicleCapacity = vehicle.seating_capacity;
-                this.$wire.vehicle_name = `${vehicle.name} - ${vehicle.model_variant}`;
-                this.calculatePrice(); // Find price for auto-selected vehicle
-            }
-        },
+                this.filterVehiclesByRoute();
+                // Recalculate total on load
+                this.calculateTotal();
+            },
 
-        calculatePrice() {
-            // Step 1: Find base fare from routes
-            const pickupId = this.$wire.pickup_location_id;
-            const dropoffId = this.$wire.dropoff_location_id;
-            const vehicleId = this.$wire.vehicle_id;
+            get totalPassengers() {
+                const adults = parseInt(this.$wire.no_of_adults) || 0;
+                const children = parseInt(this.$wire.no_of_children) || 0;
+                const infants = parseInt(this.$wire.no_of_infants) || 0;
+                return adults + children + infants;
+            },
 
-            if (pickupId && dropoffId && vehicleId) {
-                const fare = this.routeFares.find(f =>
-                    f.pickup_id == pickupId &&
-                    f.dropoff_id == dropoffId &&
-                    f.vehicle_id == vehicleId
-                );
-                
-                if (fare) {
-                     // Set Livewire price property
-                    this.$wire.price = fare.amount;
-                } else {
+            copyToWhatsappIfChecked() {
+                if (this.copyWhatsapp) this.$wire.guest_whatsapp = this.$wire.guest_phone;
+            },
+
+            handlePickupChange(event) {
+                const option = event.target.selectedOptions[0];
+                const type = option?.dataset.type || '';
+                const name = option?.dataset.name || '';
+
+                this.pickupLocationType = type;
+                this.showPickupHotel = (type === 'Hotel');
+                this.showFlightSection = (type === 'Airport');
+
+                this.$wire.pickup_location_type = type;
+                this.$wire.pickup_location_name = name;
+
+                if (type !== 'Hotel') {
+                    this.$wire.pickup_hotel_name = '';
+                    this.$wire.pickup_city_id = '';
+                }
+
+                if (type !== 'Airport') {
+                    this.$wire.airline_name = '';
+                    this.$wire.flight_number = '';
+                    this.$wire.arrival_departure_date = '';
+                    this.$wire.arrival_departure_time = '';
+                    this.$wire.flight_details = '';
+                }
+
+                this.filterVehiclesByRoute();
+                this.calculatePrice();
+            },
+
+            handleDropoffChange(event) {
+                const option = event.target.selectedOptions[0];
+                const type = option?.dataset.type || '';
+                const name = option?.dataset.name || '';
+
+                this.dropoffLocationType = type;
+                this.showDropoffHotel = (type === 'Hotel');
+
+                this.$wire.dropoff_location_type = type;
+                this.$wire.dropoff_location_name = name;
+
+                if (type !== 'Hotel') {
+                    this.$wire.dropoff_hotel_name = '';
+                    this.$wire.dropoff_city_id = '';
+                }
+
+                this.filterVehiclesByRoute();
+                this.calculatePrice();
+            },
+
+            handleVehicleChange(event) {
+                const option = event.target.selectedOptions[0];
+                const capacity = parseInt(option?.dataset.capacity) || 4;
+                const name = option?.dataset.name || '';
+
+                this.vehicleCapacity = capacity;
+                this.$wire.vehicle_name = name;
+                this.$wire.vehicle_id = option.value;
+
+                this.validateCapacity();
+                this.calculatePrice();
+            },
+
+            filterPickupHotels(event) {
+                const cityId = event.target.value;
+                this.filteredPickupHotels = cityId ?
+                    this.hotels.filter(h => h.city_id == cityId) :
+                    this.hotels;
+
+                if (this.$wire.pickup_hotel_name) {
+                    const hotelExists = this.filteredPickupHotels.some(h => h.name == this.$wire.pickup_hotel_name);
+                    if (!hotelExists) this.$wire.pickup_hotel_name = '';
+                }
+                this.$wire.pickup_city_id = cityId;
+            },
+
+            filterDropoffHotels(event) {
+                const cityId = event.target.value;
+                this.filteredDropoffHotels = cityId ?
+                    this.hotels.filter(h => h.city_id == cityId) :
+                    this.hotels;
+
+                if (this.$wire.dropoff_hotel_name) {
+                    const hotelExists = this.filteredDropoffHotels.some(h => h.name == this.$wire.dropoff_hotel_name);
+                    if (!hotelExists) this.$wire.dropoff_hotel_name = '';
+                }
+                this.$wire.dropoff_city_id = cityId;
+            },
+
+            filterVehiclesByRoute() {
+                const pickupId = this.$wire.pickup_location_id;
+                const dropoffId = this.$wire.dropoff_location_id;
+
+                if (!pickupId || !dropoffId) {
+                    this.filteredVehicles = this.vehicles;
+                    return;
+                }
+
+                const validVehicles = new Set();
+                this.routeFares.forEach(fare => {
+                    if (fare.pickup_id == pickupId && fare.dropoff_id == dropoffId) {
+                        validVehicles.add(fare.vehicle_id);
+                    }
+                });
+
+                this.filteredVehicles = this.vehicles.filter(v => validVehicles.has(v.id));
+
+                const currentVehicleId = parseInt(this.$wire.vehicle_id);
+                if (currentVehicleId && !validVehicles.has(currentVehicleId)) {
+                    this.$wire.vehicle_id = '';
+                    this.$wire.vehicle_name = '';
+                    this.calculatedPrice = '';
                     this.$wire.price = '';
                 }
-            }
-            
-            // Step 2: Calculate total (Base + Services - Discount)
-            this.calculateTotal();
-        },
 
-        calculateTotal() {
-            let base = parseFloat(this.$wire.price || 0);
-            
-            // Update display price (Base Price)
-            this.calculatedPrice = base > 0 ? base.toFixed(2) : '';
+                if (this.filteredVehicles.length === 1) {
+                    const vehicle = this.filteredVehicles[0];
+                    this.$wire.vehicle_id = vehicle.id;
+                    this.vehicleCapacity = vehicle.seating_capacity;
+                    this.$wire.vehicle_name = `${vehicle.name} - ${vehicle.model_variant}`;
+                    this.calculatePrice(); // Find price for auto-selected vehicle
+                }
+            },
 
-            // This calculates "Total Amount" but Livewire also does it.
-            // We mainly use Alpine for client-side feedback if needed, 
-            // but the Total Amount display uses {{ $totalAmount }} which is PHP.
-            // However, to mimic Create's client-side reactivity for "Base Price" input:
-            // The "Base Price" input uses x-bind:value="calculatedPrice".
-            // So calculatedPrice should represent the BASE price, not the Total.
-            // In BookingCreate, the logic was:
-            // calculatedPrice = Base + Services - Discount.
-            // AND the input label said "Base Price". This was potentially confusing but user wants match.
-            // WAIT, looking at Create Step 177:
-            // calculatePrice() sets `this.calculatedPrice = total.toFixed(2);`
-            // And input binds to `calculatedPrice`.
-            // So the input SHOWS THE TOTAL.
-            
-            // Replicating that logic:
-            let total = base;
-            
-            // Add selected additional services (using the list available in view)
-            // Note: additionalServicesList is a PHP variable available in View, need to pass to JS?
-            // In Create Step 177, it used @js($additionalServicesList).
-            // I need to add that to Alpine data object if not present.
-            // In Step 179 script, it is NOT in data object. I need to add it.
-            
-            const services = @js($additionalServicesList);
-            const selected = this.$wire.selectedServices || [];
-            
-            selected.forEach(serviceId => {
-                const service = services.find(s => s.id == serviceId);
-                if (service) {
-                    if (service.charges_type === 'percentage') {
-                        total += (service.charge_value / 100) * base;
+            calculatePrice() {
+                // Step 1: Find base fare from routes
+                const pickupId = this.$wire.pickup_location_id;
+                const dropoffId = this.$wire.dropoff_location_id;
+                const vehicleId = this.$wire.vehicle_id;
+
+                if (pickupId && dropoffId && vehicleId) {
+                    const fare = this.routeFares.find(f =>
+                        f.pickup_id == pickupId &&
+                        f.dropoff_id == dropoffId &&
+                        f.vehicle_id == vehicleId
+                    );
+
+                    if (fare) {
+                        // Set Livewire price property
+                        this.$wire.price = fare.amount;
                     } else {
-                        total += parseFloat(service.charge_value);
+                        this.$wire.price = '';
                     }
                 }
-            });
 
-            // Subtract discount
-            const discount = parseFloat(this.$wire.discountAmount || 0);
-            total -= discount;
-            
-            // If user wants "Base Price" input to show Total:
-            // this.calculatedPrice = total.toFixed(2);
-             
-            // However, in Edit, I want to be safe. "Base Price" is usually Base.
-            // "Total Amount" is separate.
-            // But if I want to match Create EXACTLY as per instructions:
-            // Create: <input ... x-bind:value="calculatedPrice" readonly>
-            // JS: calculatedPrice = total.
-            
-            // Since I added a separate "Total Amount" display block, 
-            // I will let "Base Price" show BASE PRICE (fare.amount).
-            // And "Total Amount" show total.
-            // This is arguably BETTER than Create if Create was confusing.
-            // But I must ensure interactivity.
-            
-            // I will Stick to: calculatedPrice = base.toFixed(2).
-        },
+                // Step 2: Calculate total (Base + Services - Discount)
+                this.calculateTotal();
+            },
 
-        validateCapacity() {
-            const total = this.totalPassengers;
-            if (total > this.vehicleCapacity) {
-                alert(`Warning: Total passengers (${total}) exceed vehicle capacity (${this.vehicleCapacity})`);
-                return false;
+            calculateTotal() {
+                let base = parseFloat(this.$wire.price || 0);
+
+                // Update display price (Base Price)
+                this.calculatedPrice = base > 0 ? base.toFixed(2) : '';
+
+                // This calculates "Total Amount" but Livewire also does it.
+                // We mainly use Alpine for client-side feedback if needed, 
+                // but the Total Amount display uses {{ $totalAmount }} which is PHP.
+                // However, to mimic Create's client-side reactivity for "Base Price" input:
+                // The "Base Price" input uses x-bind:value="calculatedPrice".
+                // So calculatedPrice should represent the BASE price, not the Total.
+                // In BookingCreate, the logic was:
+                // calculatedPrice = Base + Services - Discount.
+                // AND the input label said "Base Price". This was potentially confusing but user wants match.
+                // WAIT, looking at Create Step 177:
+                // calculatePrice() sets `this.calculatedPrice = total.toFixed(2);`
+                // And input binds to `calculatedPrice`.
+                // So the input SHOWS THE TOTAL.
+
+                // Replicating that logic:
+                let total = base;
+
+                // Add selected additional services (using the list available in view)
+                // Note: additionalServicesList is a PHP variable available in View, need to pass to JS?
+                // In Create Step 177, it used @js($additionalServicesList).
+                // I need to add that to Alpine data object if not present.
+                // In Step 179 script, it is NOT in data object. I need to add it.
+
+                const services = @js($additionalServicesList);
+                const selected = this.$wire.selectedServices || [];
+
+                selected.forEach(serviceId => {
+                    const service = services.find(s => s.id == serviceId);
+                    if (service) {
+                        if (service.charges_type === 'percentage') {
+                            total += (service.charge_value / 100) * base;
+                        } else {
+                            total += parseFloat(service.charge_value);
+                        }
+                    }
+                });
+
+                // Subtract discount
+                const discount = parseFloat(this.$wire.discountAmount || 0);
+                total -= discount;
+
+                // If user wants "Base Price" input to show Total:
+                // this.calculatedPrice = total.toFixed(2);
+
+                // However, in Edit, I want to be safe. "Base Price" is usually Base.
+                // "Total Amount" is separate.
+                // But if I want to match Create EXACTLY as per instructions:
+                // Create: <input ... x-bind:value="calculatedPrice" readonly>
+                // JS: calculatedPrice = total.
+
+                // Since I added a separate "Total Amount" display block, 
+                // I will let "Base Price" show BASE PRICE (fare.amount).
+                // And "Total Amount" show total.
+                // This is arguably BETTER than Create if Create was confusing.
+                // But I must ensure interactivity.
+
+                // I will Stick to: calculatedPrice = base.toFixed(2).
+            },
+
+            validateCapacity() {
+                const total = this.totalPassengers;
+                if (total > this.vehicleCapacity) {
+                    alert(`Warning: Total passengers (${total}) exceed vehicle capacity (${this.vehicleCapacity})`);
+                    return false;
+                }
+                return true;
+            },
+
+            validateDiscount() {
+                const discount = parseFloat(this.$wire.discountAmount) || 0;
+                const total = parseFloat(this.$wire.totalAmount) || 0;
+
+                if (discount > total) {
+                    setTimeout(() => {
+                        alert('Discount amount cannot exceed total amount!');
+                        this.$wire.discountAmount = total;
+                    }, 300);
+                }
             }
-            return true;
-        },
-
-        validateDiscount() {
-            const discount = parseFloat(this.$wire.discountAmount) || 0;
-            const total = parseFloat(this.$wire.totalAmount) || 0;
-            
-            if (discount > total) {
-                setTimeout(() => {
-                    alert('Discount amount cannot exceed total amount!');
-                    this.$wire.discountAmount = total;
-                }, 300);
-            }
-        }
-    };
-}
+        };
+    }
 </script>

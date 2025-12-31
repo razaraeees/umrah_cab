@@ -81,6 +81,8 @@ Route::prefix('admin')->middleware(['auth', 'verified'])->group(function () {
         Route::get('driver-account', 'index')->name('driver-account.index');
         Route::get('driver-account/{id}/details', 'driverDetails')->name('driver-account.details');
     });
+    // web.php
+    Route::get('bookings/print', [BookingController::class, 'print'])->name('booking.print');
 });
 
 

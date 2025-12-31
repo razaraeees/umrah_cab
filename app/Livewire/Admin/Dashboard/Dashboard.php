@@ -53,6 +53,10 @@ class Dashboard extends Component
             ->where('booking_status', 'cancelled')
             ->count();
 
+        $pendingBookings = (clone $baseQuery)
+            ->where('booking_status', 'pending')
+            ->count();
+
         $totalRevenue = (clone $baseQuery)->where('booking_status', '=', 'dropoff')->sum('total_amount');
 
         $totalDriverEarnings = $totalRevenue * 0.8;
@@ -63,6 +67,7 @@ class Dashboard extends Component
             'pickupBookings',
             'dropoffBookings',
             'cancelledBookings',
+            'pendingBookings',
             'totalRevenue',
             'totalDriverEarnings',
             'totalAdminEarnings'

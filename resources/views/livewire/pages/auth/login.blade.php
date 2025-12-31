@@ -28,7 +28,7 @@ $login = function () {
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <h4 class="font-size-18 text-muted mt-2 text-center">Welcome Back !</h4>
+    {{-- <h4 class="font-size-18 text-muted mt-2 text-center">Welcome Back !</h4> --}}
     <p class="text-muted text-center mb-4">Sign in to continue to {{ config('app.name', 'Laravel') }}.</p>
 
     <form class="form-horizontal" wire:submit="login">
@@ -54,10 +54,8 @@ $login = function () {
 
         <div class="mb-3 row mt-4">
             <div class="col-sm-6">
-                <div class="form-checkbox">
                     <input wire:model="form.remember" type="checkbox" class="form-check-input me-1" id="remember" name="remember">
                     <label class="form-label form-check-label" for="remember">{{ __('Remember me') }}</label>
-                </div>
             </div>
             <div class="col-sm-6 text-end">
                 @if (Route::has('password.request'))
@@ -75,27 +73,6 @@ $login = function () {
                 </button>
             </div>
         </div>
-
-        <div class="row">
-            <div class="col-12">
-                <div class="text-center plan-line">
-                    or sign up with
-                </div>
-            </div>
-        </div>
-
-        <div class="row mt-3">
-            <div class="button-list btn-social-icon text-center">
-                <button type="button" class="btn btn-facebook">
-                    <i class="fab fa-facebook"></i>
-                </button>
-                <button type="button" class="btn btn-twitter ms-1">
-                    <i class="fab fa-twitter"></i>
-                </button>
-                <button type="button" class="btn btn-linkedin ms-1">
-                    <i class="fab fa-linkedin"></i>
-                </button>
-            </div>
-        </div>
+        
     </form>
 </div>

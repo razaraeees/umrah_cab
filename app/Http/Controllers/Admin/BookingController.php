@@ -21,4 +21,16 @@ class BookingController extends Controller
     {
         return view('admin.booking.edit', ['id' => $id]);
     }
+
+    public function print(Request $request)
+    {
+        $filters = [
+            'search' => $request->get('search', ''),
+            'dateFilter' => $request->get('dateFilter', ''),
+            'startDate' => $request->get('startDate', ''),
+            'endDate' => $request->get('endDate', ''),
+        ];
+        
+        return view('admin.booking.print', compact('filters'));
+    }
 }

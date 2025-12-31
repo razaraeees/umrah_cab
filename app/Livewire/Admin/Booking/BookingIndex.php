@@ -5,6 +5,8 @@ namespace App\Livewire\Admin\Booking;
 use Livewire\Component;
 use Livewire\WithPagination;
 use App\Models\Bookings;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 use Illuminate\Support\Facades\Log;
 
 class BookingIndex extends Component
@@ -30,7 +32,8 @@ class BookingIndex extends Component
                 'vehicle.assignedDriver'
             ])->findOrFail($bookingId);
 
-            $amount = number_format($booking->price - ($booking->price * 0.20), 2);
+            $amount = number_format($booking->total_amount - ($booking->total_amount * 0.20), 2);
+            $price = $booking->total_amount -= $amount;
             $vehicle = $booking->vehicle;
             $capacity = $vehicle?->seating_capacity ?? 'N/A';
             $bags = $vehicle?->bag_capacity ?? 'N/A';
@@ -62,7 +65,7 @@ class BookingIndex extends Component
                 if ($pickupHotel) $lines[] = $pickupHotel;
                 $lines[] = "TO: {$booking->dropoff_location_name}";
                 if ($dropoffHotel) $lines[] = $dropoffHotel;
-                
+
                 $text = implode("\n", $lines);
             } else {
                 $lines = [
@@ -71,14 +74,18 @@ class BookingIndex extends Component
                     "👤 Name: {$booking->guest_name}",
                     "📞 Contact: {$booking->guest_phone}",
                     "",
+                    "💰 Balance Price: {$amount} SAR",
+                    "💰 Advance Price: {$price} SAR",
+
+                    "",
                     "📅 Pickup Date: {$pickupDate}",
                     "⏰ Pickup Time: {$booking->pickup_time}",
                     "",
                     "📍 Journey:",
-                    "FROM: {$booking->pickupLocation->pickup_location_name}",
+                    "FROM: {$booking->pickup_location_name}",
                 ];
                 if ($pickupHotel) $lines[] = $pickupHotel;
-                $lines[] = "TO: {$booking->dropoffLocation->dropoff_location_name}";
+                $lines[] = "TO: {$booking->dropoff_location_name}";
                 if ($dropoffHotel) $lines[] = $dropoffHotel;
                 $lines[] = "";
                 $lines[] = "🚗 Driver Details:";
@@ -86,29 +93,48 @@ class BookingIndex extends Component
                 $lines[] = "Contact: {$driverPhone}";
                 $lines[] = "";
                 $lines[] = "🙏 Thank you for choosing us!";
-                
+
                 $text = implode("\n", $lines);
             }
 
             // Store in session temporarily
             cache()->put('clipboard_' . auth()->id(), $text, now()->addMinutes(5));
-            
+
             // Dispatch event with simple flag
             $this->dispatch('do-copy-now');
-
         } catch (\Exception $e) {
 
             $this->dispatch('copy-error');
         }
     }
 
-// Add this new method to retrieve text
-public function getClipboardText()
-{
-    return session('clipboard_text', '');
-}
+    public function generateInvoicePDF($id, $type)
+    {
+        $booking = Bookings::with([
+            'pickupLocation',
+            'dropoffLocation',
+            'vehicle.assignedDriver',
+            'additionalServices'
+        ])->findOrFail($id);
 
+        $view = $type === 'customer'
+            ? 'admin.booking.pdf.customer'
+            : 'admin.booking.pdf.driver';
 
+        $pdf = Pdf::loadView($view, [
+            'booking' => $booking
+        ])->setPaper('A4');
+
+        return $pdf->download(
+            strtoupper($type) . '_INVOICE_' . $booking->id . '.pdf'
+        );
+    }
+
+    // Add this new method to retrieve text
+    public function getClipboardText()
+    {
+        return session('clipboard_text', '');
+    }
 
     // Ye zaruri hai taake search update hone par page reset ho jaye
     public function updatingSearch()
@@ -150,55 +176,17 @@ public function getClipboardText()
 
     public function render()
     {
-        $query = Bookings::with(['pickupLocation', 'dropoffLocation', 'vehicle'])
-            ->when($this->search, function ($query) {
-                $query->where('guest_name', 'like', '%' . $this->search . '%')
-                    ->orWhere('guest_phone', 'like', '%' . $this->search . '%')
-                    ->orWhereHas('vehicle', function ($q) {
-                        $q->where('vehicle_name', 'like', '%' . $this->search . '%');
-                    })
-                    ->orWhereHas('pickupLocation', function ($q) {
-                        $q->where('pickup_location_name', 'like', '%' . $this->search . '%');
-                    })
-                    ->orWhereHas('dropoffLocation', function ($q) {
-                        $q->where('dropoff_location_name', 'like', '%' . $this->search . '%');
-                    });
-            });
+        $filters = [
+            'search' => $this->search,
+            'date_filter' => $this->dateFilter,
+            'start_date' => $this->startDate,
+            'end_date' => $this->endDate,
+        ];
 
-        // Date filter logic
-        if ($this->dateFilter) {
-            $today = now()->format('Y-m-d');
-            $tomorrow = now()->addDay()->format('Y-m-d');
-            $afterTomorrow = now()->addDays(2)->format('Y-m-d');
-            $yesterday = now()->subDay()->format('Y-m-d');
-
-            switch ($this->dateFilter) {
-                case 'today':
-                    $query->whereDate('pickup_date', $today);
-                    break;
-                case 'tomorrow':
-                    $query->whereDate('pickup_date', $tomorrow);
-                    break;
-                case 'after_tomorrow':
-                    $query->whereDate('pickup_date', $afterTomorrow);
-                    break;
-                case 'yesterday':
-                    $query->whereDate('pickup_date', $yesterday);
-                    break;
-            }
-        }
-
-        // Custom date range filtering
-        if ($this->startDate && $this->endDate) {
-            $query->whereDate('pickup_date', '>=', $this->startDate)
-                ->whereDate('pickup_date', '<=', $this->endDate);
-        } elseif ($this->startDate) {
-            $query->whereDate('pickup_date', '>=', $this->startDate);
-        } elseif ($this->endDate) {
-            $query->whereDate('pickup_date', '<=', $this->endDate);
-        }
-
-        $bookings = $query->orderBy('created_at', 'desc')->paginate(10);
+        $bookings = Bookings::with(['pickupLocation', 'dropoffLocation', 'vehicle'])
+            ->filter($filters)
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
 
         return view('livewire.admin.booking.booking-index', compact('bookings'));
     }

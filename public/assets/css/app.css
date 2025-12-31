@@ -63,9 +63,10 @@
     background-color: #fafafa;
 }
 .navbar-brand-box {
-    padding: 0 1.5rem;
+    padding: 0 1.5rem;  
     text-align: center;
     width: 240px;
+    box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
 }
 .logo {
     line-height: 70px;
@@ -211,20 +212,20 @@ body[data-topbar="dark"] .navbar-header .waves-effect .waves-ripple {
     background: rgba(255, 255, 255, 0.4);
 }
 body[data-topbar="dark"] .header-item {
-    color: #8199a3;
+    color: #fefefe;
     padding: 6px;
 }
 body[data-topbar="dark"] .header-item .top-icon i {
-    border: 1px solid #405763;
+    border: 1px solid #fefefe;
 }
 body[data-topbar="dark"] .header-item:hover {
-    color: #8199a3;
+    color: #fefefe;
 }
 body[data-topbar="dark"] .header-profile-user {
     background-color: rgba(255, 255, 255, 0.25);
 }
 body[data-topbar="dark"] .noti-icon i {
-    color: #8199a3;
+    color: #fefefe;
 }
 body[data-topbar="dark"] .logo-dark {
     display: none;
@@ -523,13 +524,13 @@ body[data-layout="horizontal"] .footer {
     color: yellow !important;
 }
 .mm-active .active {
-    color: #EEEEEE !important;
-    background: #18614E !important;
+    color: yellow !important;
+    background: #393b3b !important;
     border-left-color: #18614E !important;
 }
 .mm-active .active i {
-    color: #EEEEEE !important;
-    background: #18614E !important;
+    color: yellow !important;
+    /* background: #18614E !important; */
     border-left-color: #18614E !important;
 }
 @media (max-width: 992px) {
@@ -1464,7 +1465,7 @@ body[data-layout="horizontal"][data-layout-size="boxed"] .navbar-header {
     background-color: #fff;
     border: 2px solid #f6f6f6;
     border-radius: 0.25rem;
-    padding: 0.5rem 2 rem;
+    padding: 0.5rem 2rem;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -3230,6 +3231,9 @@ table.dataTable.dtr-inline.collapsed > tbody > tr > td.dtr-control:before {
 }
 .auth-logo.logo-dark {
     display: block !important;
+    max-width: 100%;
+    width: 150px;
+    height: 150px;
 }
 .plan-line::after {
     content: "";
