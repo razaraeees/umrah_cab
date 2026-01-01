@@ -117,17 +117,19 @@ class BookingIndex extends Component
             'additionalServices'
         ])->findOrFail($id);
 
-        $view = $type === 'customer'
-            ? 'admin.booking.pdf.customer'
-            : 'admin.booking.pdf.driver';
+        $view = $type === 'customer' ? 'admin.booking.pdf.customer' : 'admin.booking.pdf.driver';
 
         $pdf = Pdf::loadView($view, [
             'booking' => $booking
         ])->setPaper('A4');
 
-        return $pdf->download(
-            strtoupper($type) . '_INVOICE_' . $booking->id . '.pdf'
+        $filename = preg_replace('/[^\x20-\x7E]/', '', strtoupper($type) . '_INVOICE_' . $booking->id);
+
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            $filename . '.pdf'
         );
+
     }
 
     // Add this new method to retrieve text

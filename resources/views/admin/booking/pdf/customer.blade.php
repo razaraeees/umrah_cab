@@ -7,7 +7,7 @@
     <title>Customer Invoice</title>
     <style>
         body { 
-            font-family: Arial, sans-serif; 
+            font-family: "DejaVu Sans", sans-serif;
             margin: 20px; 
             line-height: 1.4;
         }
